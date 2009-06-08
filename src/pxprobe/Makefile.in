@@ -1,0 +1,61 @@
+# $Id: Makefile.in,v 1.2 2005/12/01 08:28:26 mederchik Exp $
+#
+# Copyright (C) 2005 Meder Kydyraliev <meder@o0o.nu>
+# Copyright (C) 2001-2005 Fyodor Yarochkin <fygrave@tigerteam.net>,
+#                    Ofir Arkin       <ofir@sys-security.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
+CC=@CC@
+CXX=@CXX@
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+DESTDIR=
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+mandir=@mandir@
+PACKAGE=@PACKAGE@
+VERSION=@VERSION@
+CPPFLAGS=@CPPFLAGS@
+CXXFLAGS=$(CPPFLAGS) @CXXFLAGS@ -I ../ -I ../../libs-external/USI++/
+CFLAGS=$(CPPFLAGS) @CFLAGS@ -I ../ -I ../../libs-external/USI++/
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+INSTALL=@INSTALL@
+RANLIB=@RANLIB@
+OBJS=AsyncOutputReader.o PopenCommandExecutor.o PxprobeOutputProcessor.o pxprobe.o ../cmd_opts.o ../config_set.o ../interface.o ../interface_con.o ../log.o ../os_matrix.o ../scan_engine.o ../target.o ../targets_list.o ../xprobe_module_hdlr.o ../xprobe_module_param.o  ../xpmodules/alive_probe/alive_probe.a ../xpmodules/os_probe/os_probe.a ../xplib/libxplib.a ../../libs-external/USI++/src/libusi++.a
+
+
+all: pxprobe
+
+pxprobe: $(OBJS)
+	$(CXX) $(CFLAGS) $(OBJS) $(MODOBJS) -o $@ $(LDFLAGS) $(LIBS)
+	strip $@
+
+
+.c.o: $(INCLUDES)
+	$(CC) -c $(CFLAGS) $<
+
+.cc.o: $(INCLUDES)
+	$(CXX) -c $(CFLAGS) $<
+
+clean:
+	rm -f pxprobe core *.o
+
+distclean: clean
+	rm -f Makefile
