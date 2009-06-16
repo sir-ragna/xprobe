@@ -59,8 +59,8 @@ xprobe_module_func_t mod_init_funcs[]= {
 	{"fingerprint:icmp_port_unreach", icmp_port_unreach_init},
 	{"fingerprint:tcp_hshake", tcp_handshake_mod_init},
 	{"fingerprint:tcp_rst", tcp_rst_mod_init},
-	{"fingerprint:smb", smb_mod_init},
-	{"fingerprint:snmp", snmp_mod_init},
+	{"app:smb", smb_mod_init},
+	{"app:snmp", snmp_mod_init},
 	{NULL, NULL}
 };
 

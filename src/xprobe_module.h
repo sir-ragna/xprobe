@@ -58,6 +58,10 @@ class Xprobe_Module {
 	void enable(void) { enabled = true; }
 	void disable(void) { enabled = false; }
 	bool is_disabled(void) { return (enabled == false);};
+	bool operator<(Xprobe_Module& rhs) {
+		return this->getGain() < rhs.getGain();
+	}
+	virtual float getGain() { return 0; }
     virtual ~Xprobe_Module(void) { return; }
     /* these to be overriden */
     virtual int init(void) =0;

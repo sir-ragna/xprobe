@@ -24,8 +24,8 @@
 
 #define VERSION "@VERSION@"
 #define BANNER \
-"\nXprobe2 v."VERSION\
-" Copyright (c) 2002-2007 fyodor@o0o.nu, ofir@sys-security.com, meder@o0o.nu"\
+"\nXprobe-ng v."VERSION\
+" Copyright (c) 2002-2009 fyodor@o0o.nu, ofir@sys-security.com, meder@o0o.nu"\
 "\n"
 
 #define DATA_SIZE 20
@@ -113,7 +113,7 @@
 #define FAIL		-1
 #define OK			0
 #define RETRY		-2
-#define TRUE		1 
+#define TRUE		1
 #define FALSE		0
 
 #define XPROBE_DEBUG_ALL          0xffffffff
@@ -121,7 +121,7 @@
 #define XPROBE_DEBUG_DSOTESTS     2
 #define XPROBE_DEBUG_INIT         4
 #define XPROBE_DEBUG_MODULES      8
-#define XPROBE_DEBUG_OSMATRIX    16  
+#define XPROBE_DEBUG_OSMATRIX    16
 #define XPROBE_DEBUG_CONFIG      32
 #define XPROBE_DEBUG_TARGET      64
 

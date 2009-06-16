@@ -46,44 +46,28 @@ int Scan_Engine::init(void) {
 int Scan_Engine::run(void) {
     Target *tg;
     Xprobe::Timeval rtt;
-
     ui->msg("[+] Running scan engine\n");
-
     while((tg = targets->getnext()) != NULL) {
-		tg->show_route(cfg->show_route());
-		tg->set_udp_ports(cfg->get_udp_ports());
-		tg->set_tcp_ports(cfg->get_tcp_ports());
-		tg->set_tcp_toscan(copts->get_tcp_ports_to_scan());
-		tg->set_udp_toscan(copts->get_udp_ports_to_scan());
-		tg->generate_sig(copts->generate_sig());
-        // first we check if the system is reachable
-		xml->log(XPROBELOG_TG_SESS_START, "%a", inet_ntoa(tg->get_addr()));
-		xml->log(XPROBELOG_REACH_SESS_START, "reachability");
-        if (tg->check_alive()) {
-            ui->msg("[+] Target: %s is alive. Round-Trip Time: %.5f sec\n", inet_ntoa(tg->get_addr()), (double)tg->get_rtt());
+        tg->show_route(cfg->show_route());
+        tg->set_udp_ports(cfg->get_udp_ports());
+        tg->set_tcp_ports(cfg->get_tcp_ports());
+        tg->set_tcp_toscan(copts->get_tcp_ports_to_scan());
+        tg->set_udp_toscan(copts->get_udp_ports_to_scan());
+        tg->generate_sig(copts->generate_sig());
+        xml->log(XPROBELOG_TG_SESS_START, "%a", inet_ntoa(tg->get_addr()));
 
-            /* roundtrip time magic */
-            if (copts->is_rtt_forced() || !tg->get_rtt()) // force rtt to be fixed value (eq timeout)
-                                            // or if calculated roundtrip is 0
-                rtt = copts->get_timeout(); // then we override
-            else { 
-				rtt = tg->get_rtt() + tg->get_rtt() ; // double time of roundtrip.
-				xml->log(XPROBELOG_MSG_RTT, "%r%s", (double)tg->get_rtt(), (double)rtt);
-			}
-
-		    tg->set_rtt(rtt);
-            ui->msg("[+] Selected safe Round-Trip Time value is: %.5f sec\n", (double)tg->get_rtt());
-			xml->log(XPROBELOG_REACH_SESS_END, "end reachability\n");
-		    if (copts->do_portscan())
-                // FIXME: gather_info should be done later, maybe?
-			    tg->gather_info();
-            tg->os_probe();
-        } else {
-			xml->log(XPROBELOG_REACH_SESS_END, "end reachability\n");
-		}
-		xml->log(XPROBELOG_TG_SESS_END, "done with target");
-
-
+        if (copts->is_rtt_forced()) {
+            rtt = copts->get_timeout(); // then we override
+            tg->set_rtt(rtt);
+            ui->msg("[+] RTT forced: %.5f sec\n",
+                                  (double)tg->get_rtt());
+        }
+        if (copts->do_portscan()) {
+            ui->msg("[+] Initial Information Gathering forced");
+            tg->gather_info();
+        }
+        tg->scan();
+        xml->log(XPROBELOG_TG_SESS_END, "done with target");
     }
 
     return 1;
@@ -94,5 +78,4 @@ int Scan_Engine::fini(void) {
 
     return 1;
 }
-
 

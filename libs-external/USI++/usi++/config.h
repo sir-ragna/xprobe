@@ -8,7 +8,7 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
-#define HAVE_LIBNSL 1
+/* #undef HAVE_LIBNSL */
 
 /* Define to 1 if you have the `pcap' library (-lpcap). */
 #define HAVE_LIBPCAP 1
@@ -17,7 +17,7 @@
 /* #undef HAVE_LIBSOCKET */
 
 /* Define to 1 if you have the <linux/filter.h> header file. */
-#define HAVE_LINUX_FILTER_H 1
+/* #undef HAVE_LINUX_FILTER_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1

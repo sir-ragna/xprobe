@@ -22,8 +22,8 @@ AC_INIT(src/xprobe.cc)
 AC_LANG_CPLUSPLUS
 AC_ARG_PROGRAM
 
-PACKAGE=xprobe2
-VERSION='0.3'
+PACKAGE=xprobe-ng
+VERSION='2.1'
 
 if test "x$sysconfdir" != xNONE; then
 	if test "x$prefix" = xNONE; then

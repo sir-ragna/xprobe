@@ -26,17 +26,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
- 
+
 #include <time.h>
 #define IP_VERSION 4
- 
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
- 
+
 #include <sys/param.h>
 
 #ifndef bzero
@@ -54,7 +54,7 @@
 #include <glib.h>
 #endif
 #endif
- 
+
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -62,7 +62,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <sys/time.h>
-#ifdef __linux__ 
+#ifdef __linux__
 #define __FAVOR_BSD
 #endif
 /* fix the OsX bug */
@@ -89,14 +89,14 @@
 #if !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(SOLARIS) &&  !defined(__sgi)
 #include <net/ethernet.h>
 #endif
- 
+
 #ifdef SOLARIS
 #include <sys/sockio.h>
 #ifndef INADDR_NONE
 #define INADDR_NONE -1
 #endif
 #endif
- 
+
 #include <netinet/if_ether.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -130,7 +130,7 @@ extern "C" {
  * order
  */
 
-#if defined(__linux__) || defined(__OpenBSD__)    
+#if defined(__linux__) || defined(__OpenBSD__)
 #define IPOFF_FIX(off)      htons((unsigned short)(off))
 #else
 #define IPOFF_FIX(off)      (off)
@@ -145,4 +145,5 @@ extern "C" {
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #endif /* XPROBE_H */

@@ -26,16 +26,12 @@
 #include "xprobe_module.h"
 #include "target.h"
 #include "os_matrix.h"
-/*
-#include <string>
-#include <map>
-*/
 
 using namespace std;
 
 class Xprobe_Module_Hdlr {
     private:
-        map<int, Xprobe_Module *> modlist;
+        vector <Xprobe_Module *> modlist;
         map<string, int> kwdlist;
         int keywords;
         int mod_counter;
@@ -44,20 +40,21 @@ class Xprobe_Module_Hdlr {
         int load(void);
         int init(void);
         int print(void);
-        int exec(int, Target *, OS_Matrix *);
+        int exec(Target *, OS_Matrix *);
+        int gather_info(Target *);
         int fini(void);
-        
-		void display_mod_names(void);
+
+	void display_mod_names(void);
         int register_module(Xprobe_Module *);
         int add(int(*)(Xprobe_Module_Hdlr *, char *), char *);
         void add_keyword(int, char *);
 		int get_module_count();
-		int modbyname(char *nm);	
+		int modbyname(char *nm);
 		bool mod_disabled_by_default(unsigned int ix) {
 			unsigned int disabled_mods[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
 			if (ix < sizeof(disabled_mods))
 				return (disabled_mods[ix] == 1);
-			else 
+			else
 				return false;
 		}
         Xprobe_Module *find_mod(string &);
