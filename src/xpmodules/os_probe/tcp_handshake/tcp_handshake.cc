@@ -35,8 +35,8 @@ extern Interface *ui;
 extern Cmd_Opts *copts;
 
 
-TCP_Handshake_Mod::TCP_Handshake_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, 
-		"fingerprint:tcp_hshake","TCP Handshake fingerprinting module") { 
+TCP_Handshake_Mod::TCP_Handshake_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST,
+		"fingerprint:tcp_hshake","TCP Handshake fingerprinting module") {
 
 	TCP_Handshake_Ttl_Check *ttlc = new TCP_Handshake_Ttl_Check;
 	TCP_Handshake_Ip_Id_Check *ipidc = new TCP_Handshake_Ip_Id_Check;
@@ -76,7 +76,7 @@ int TCP_Handshake_Mod::exec(Target *tg, OS_Matrix *os) {
 
 //	if (run_probe(tg, os) != FAIL) {
 		return run_probe(tg, os);
-//	}	
+//	}
 //	return FAIL;
 }
 
@@ -103,7 +103,7 @@ int TCP_Handshake_Mod::run_probe(Target *tg, OS_Matrix *os) {
 	if (used_port != 0)
 		usleep(10000);
 	/*
-	 * logic is as follows: 
+	 * logic is as follows:
 	 * - if user supplied the port with -p switch we'll go ahead and do a run
 	 *   using the port specified(or if got ports from portscan);
 	 * - if user didnot supply the port w/ -p, but supplied -B (tcp bruteforce),
@@ -130,7 +130,7 @@ int TCP_Handshake_Mod::run_probe(Target *tg, OS_Matrix *os) {
 	srand(time(NULL));
 	while (have_more_ports) {
 		request->set_tcpsum(0);
-		if (no_open_port) { // we bruteforce 
+		if (no_open_port) { // we bruteforce
 			if (ix < sizeof(tcp_brute_ports)/sizeof(unsigned short)) {
 				request->set_dstport(tcp_brute_ports[ix++]);
 				request->set_srcport(rand());
@@ -203,7 +203,7 @@ int TCP_Handshake_Mod::run_probe(Target *tg, OS_Matrix *os) {
 
 						if (timestamps[1] == 0)
 							tse_first = 0;
-						else 
+						else
 							tse_first = 1;
 						for (ts_i = tsval.begin(); ts_i != tsval.end(); ts_i++)
 							if (ts_i->second == tsv_first)
@@ -218,7 +218,7 @@ int TCP_Handshake_Mod::run_probe(Target *tg, OS_Matrix *os) {
 						tsv_first = timestamps[0];
 						tse_first = timestamps[1];
 					} else {
-						for (ts_i = tsval.begin(); ts_i != tsval.end(); ts_i++)  
+						for (ts_i = tsval.begin(); ts_i != tsval.end(); ts_i++)
 							if (ts_i->second == 2) /* NONE */
 								os->add_result(get_id(), ts_i->first, XPROBE_MATCH_YES);
 							else
@@ -226,7 +226,7 @@ int TCP_Handshake_Mod::run_probe(Target *tg, OS_Matrix *os) {
 						for (ts_i = tsecr.begin(); ts_i != tsecr.end(); ts_i++)
 							if (ts_i->second == 2) /* NONE */
 								os->add_result(get_id(), ts_i->first, XPROBE_MATCH_YES);
-							else 
+							else
 								os->add_result(get_id(), ts_i->first, XPROBE_MATCH_NO);
 					}
 					if (tg->generate_sig())
@@ -291,7 +291,7 @@ int TCP_Handshake_Mod::parse_options(char *tcp_options, int len) {
 		// however neither data is parsed, nor we add option to
 		// opt_order
 		switch(tcp_options[lenparsed]) {
-			case TCPOPT_WINDOW:	
+			case TCPOPT_WINDOW:
 				xprobe_mdebug(XPROBE_DEBUG_MODULES, "WSCALE ");
 				if (optlen != TCPOLEN_WINDOW) {
 					xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Bad TCPOPT_WINDOW len %d", get_name(), optlen);
@@ -310,7 +310,7 @@ int TCP_Handshake_Mod::parse_options(char *tcp_options, int len) {
 					xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Bad TCPOPT_TIMESTAMP len %d", get_name(), optlen);
 					optlen = TCPOLEN_TIMESTAMP;
 					continue;
-				} 
+				}
 				// we are guaranteed to have 8 bytes of option data at tcp_options+lenparsed
 				memcpy(&timestamps[0], tcp_options+lenparsed+2, 4);
 				memcpy(&timestamps[1], tcp_options+lenparsed+6, 4);
@@ -347,7 +347,7 @@ int TCP_Handshake_Mod::parse_options(char *tcp_options, int len) {
 		}
 
 	}
-	
+
     return OK;
 }
 
@@ -359,9 +359,9 @@ int TCP_Handshake_Mod::fini(void) {
 int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
 	unsigned int vl=0;
 	map<string, Xprobe_Module_Param_TCP *>::iterator m_i;
-	
+
 	xprobe_debug(XPROBE_DEBUG_SIGNATURES, "Parsing for %i : %s  = %s\n", os_id,  kwd, val);
-    
+
 	if ((m_i=kwd_chk.find(kwd)) != kwd_chk.end()) {
 		return (m_i->second->parse_param(os_id, val));
 	}
@@ -377,24 +377,24 @@ int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val
 		memset(opt_order, 0, sizeof(opt_order));
 		//for the loop to work and parse last param
 		// last char should be  `"' anyway
-		options[options.size()-1] = ' '; 
+		options[options.size()-1] = ' ';
 		begin = options.find_first_not_of('"');
 		end = options.find_first_of(' ');
 		while (begin != string::npos && end != string::npos) {
 			if (k < sizeof(opt_order))
-				opt_order[k++] = options.substr(begin, end)[0];	
-			else 
+				opt_order[k++] = options.substr(begin, end)[0];
+			else
 				ui->msg("[%s] Too many options specified\n", get_name());
 			begin=options.find_first_not_of(' ', end);
 			end = options.find_first_of(' ', begin);
 		}
-		// sanity check to make sure no UNKNOWN 
+		// sanity check to make sure no UNKNOWN
 		// options were specified in the fingerprint
 		while (k-- > 0) {
 			if (opt_order[k] != 'N' && opt_order[k] != 'M' &&
 				opt_order[k] != 'W' && opt_order[k] != 'S' &&
 				opt_order[k] != 'T') {
-				ui->msg("[%s] Unknown TCP option %c in fingerprint (%s=%s)\n", 
+				ui->msg("[%s] Unknown TCP option %c in fingerprint (%s=%s)\n",
 							get_name(), opt_order[k], kwd, val);
 				return FAIL;
 			}
@@ -411,7 +411,7 @@ int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val
 			if (errno == ERANGE) {
 				ui->msg("tcp_handshake::parse_keyword() bad value for keyword(%s=%s)", kwd, val);
 				return FAIL;
-			}	
+			}
 			wscale_map.insert(pair<int, int>(os_id, j));
 		} else
 			ui->msg("[%s] Unknown value (%s=%s)\n", kwd, val);
@@ -527,10 +527,10 @@ void TCP_Handshake_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig) {
 		else
 			value = "!0";
 		tg->signature(keyword, value);
-		keyword = "tcp_syn_ack_ack";	
+		keyword = "tcp_syn_ack_ack";
 		memset(buf, 0, sizeof(buf));
 		snprintf(buf, sizeof(buf), "%d", pack->get_ack() - orig->get_seq());
-		tg->signature(keyword.c_str(), buf);	
+		tg->signature(keyword.c_str(), buf);
 		keyword = "tcp_syn_ack_window_size";
 		memset(buf, 0, sizeof(buf));
 		snprintf(buf, sizeof(buf), "%d", pack->get_win());
@@ -572,7 +572,7 @@ void TCP_Handshake_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig) {
 				value = "0";
 			else
 				value = "!0";
-			tg->signature(keyword, value);	
+			tg->signature(keyword, value);
 			keyword= "tcp_syn_ack_tsecr";
 			if (timestamps[1] == 0)
 				value = "0";
@@ -603,12 +603,12 @@ void TCP_Handshake_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig) {
 
 int tcp_handshake_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    TCP_Handshake_Mod *tcp_handshake = new TCP_Handshake_Mod;
+    TCP_Handshake_Mod *tcp_handshake = new TCP_Handshake_Mod();
 
     tcp_handshake->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the TCP handshake module\n");
     pt->register_module(tcp_handshake);
-	pt->add_keyword(tcp_handshake->get_id(), "tcp_syn_ack_ttl"); 
+	pt->add_keyword(tcp_handshake->get_id(), "tcp_syn_ack_ttl");
 	pt->add_keyword(tcp_handshake->get_id(), "tcp_syn_ack_ip_id");
 	pt->add_keyword(tcp_handshake->get_id(), "tcp_syn_ack_tos");
 	pt->add_keyword(tcp_handshake->get_id(), "tcp_syn_ack_df");
@@ -629,7 +629,7 @@ int TCP_Handshake_Ttl_Check::check_param(TCP *p, TCP *o, OS_Matrix *os) {
 }
 
 int TCP_Handshake_Ip_Id_Check::check_param(TCP *p, TCP *o, OS_Matrix *os) {
-	int retval = OK;	
+	int retval = OK;
 	if (!p->timeout())
 		retval = add_param(p->get_id(), o->get_id(), os);
 	return retval;
@@ -643,7 +643,7 @@ int TCP_Handshake_Tos_Check::check_param(TCP *p, TCP *o, OS_Matrix *os) {
 }
 
 int TCP_Handshake_Df_Bit_Check::check_param(TCP *p, TCP *o, OS_Matrix *os) {
-	int retval = OK;	
+	int retval = OK;
 	if (!p->timeout())
 		retval = add_param(((p->get_fragoff() & IP_DF) != 0), ((o->get_fragoff() & IP_DF) != 0), os);
 	return retval;

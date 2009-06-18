@@ -58,7 +58,7 @@ int UDP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(remote));
-    
+
     tv = copts->get_timeout();
 
     if (tg->get_port(IPPROTO_UDP, XPROBE_TARGETP_OPEN) == -1 &&
@@ -94,11 +94,11 @@ int UDP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
 		ret = sn.sniffpack(buf, sizeof(buf));
 		if (!sn.timeout()) {
 			/* FIXME: lame check */
-            
+
 		        //printf("got responce: %x %i\n", sn.get_src(), sn.get_id());
-			if (sn.get_src() == remote.s_addr && 
-                sn.get_proto() == IPPROTO_ICMP && 
-                sn.get_type() == ICMP_DEST_UNREACH && 
+			if (sn.get_src() == remote.s_addr &&
+                sn.get_proto() == IPPROTO_ICMP &&
+                sn.get_type() == ICMP_DEST_UNREACH &&
                 sn.get_code() == ICMP_PORT_UNREACH) {
 
 				done = 1;
@@ -115,7 +115,7 @@ int UDP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
     if (ret > -1) {
         tt = t2 - t1;
         xprobe_debug(XPROBE_DEBUG_MODULES, "UDP PING response: %.7f\n", (double)tt);
-        if (tg->get_rtt() < tt) 
+        if (tg->get_rtt() < tt)
             tg->set_rtt(tt);
         os->add_result(get_id(), 1, XPROBE_MATCH_YES);
     } else {
@@ -131,7 +131,7 @@ int UDP_Ping_Mod::fini(void) {
 }
 
 int UDP_Ping_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "Parsing for %i : %s  = %s\n",
                                                         os_id,  kwd, val);
     return OK;
@@ -141,7 +141,7 @@ int UDP_Ping_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
 
 int udp_ping_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    UDP_Ping_Mod *module = new UDP_Ping_Mod;
+    UDP_Ping_Mod *module = new UDP_Ping_Mod();
 
     module->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the UDP PING module\n");

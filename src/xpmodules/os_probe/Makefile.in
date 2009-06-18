@@ -42,9 +42,10 @@ INCLUDES=@INCLUDES@
 all: os_probe.a
 
 os_probe.a: icmp_port_unreach_mod icmp_echo_id_mod icmp_timestamp_mod \
-icmp_inforeq_mod icmp_addrmask_mod tcp_handshake_mod tcp_rst_mod smb_mod snmp_mod
+icmp_inforeq_mod icmp_addrmask_mod tcp_handshake_mod tcp_rst_mod smb_mod snmp_mod http_mod ftp_mod
 	ar cr os_probe.a icmp_port_unreach/*.o icmp_echo_id/*.o icmp_timestamp/*.o \
-    icmp_inforeq/*.o icmp_addrmask/*.o tcp_handshake/*.o tcp_rst/*.o smb/*.o snmp/*.o
+    icmp_inforeq/*.o icmp_addrmask/*.o tcp_handshake/*.o tcp_rst/*.o smb/*.o snmp/*.o \
+	http/*.o ftp/*.o
 	$(RANLIB) os_probe.a
 
 	
@@ -76,6 +77,10 @@ smb_mod:
 
 snmp_mod:
 	cd snmp; ${MAKE}
+http_mod:
+	cd http; ${MAKE}
+ftp_mod:
+	cd ftp; ${MAKE}
 
 clean:
 	rm -f core *.o *.so
@@ -89,6 +94,8 @@ clean:
 	cd tcp_rst; ${MAKE} clean
 	cd smb; ${MAKE} clean 
 	cd snmp; ${MAKE} clean 
+	cd http; ${MAKE} clean 
+	cd ftp; ${MAKE} clean 
 
 distclean: clean
 	rm -f Makefile
@@ -101,3 +108,5 @@ distclean: clean
 	cd tcp_rst; ${MAKE} distclean
 	cd smb; ${MAKE} distclean
 	cd snmp; ${MAKE} distclean
+	cd http; ${MAKE} distclean
+	cd ftp; ${MAKE} distclean

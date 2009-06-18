@@ -66,22 +66,11 @@ bool Cmd_Opts::tcp_port_brute(void) {
 }
 
 int Cmd_Opts::parse(int argc, char *argv[]) {
-	int c, modcount = xmh->get_module_count();
-	long mod_to_disable, mod_to_enable;
+    int c;
 
-    if ((mods = new int[modcount]) == NULL) {
-        ui->error("Cmd_Opts::parse: memory allocation failed\n");
-        return FAIL;
-    }
-    // initialize each module entry to be enabled 
-    for (c=0; c < modcount; c++) {
-		if (xmh->mod_disabled_by_default(c)) 
-			mods[c] = XPROBE_MODULE_DISABLED;
-		else
-			mods[c] = XPROBE_MODULE_ENABLED;
-	}
 
-    while((c = getopt(argc, argv, "vi:p:ho:t:d:c:rD:m:M:PT:U:s:fLFXBA")) !=EOF) 
+
+    while((c = getopt(argc, argv, "vi:p:ho:t:d:c:rD:m:M:PT:U:s:fLFXBA")) !=EOF)
         switch(c) {
             case 'd':
                 debuglevel = atol(optarg);
@@ -90,16 +79,16 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
                 verbose++;
                 break;
             case 'o':
-                logfile = optarg;    
+                logfile = optarg;
                 break;
             case 'c':
-                config_file = optarg; 
+                config_file = optarg;
                 break;
             case 's':
                 send_delay = atof(optarg);
-                break;     
+                break;
             case 't':
-                receive_timeout = atof(optarg);    
+                receive_timeout = atof(optarg);
                 if ((double)receive_timeout <0) {
                     ui->error("Incorrect receive timeout %s\n", optarg);
                     usage(argv[0]);
@@ -110,7 +99,7 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
 				xmh->display_mod_names();
 				ui->msg("\n\n");
 				usage(argv[0]);
-				break; 
+				break;
             case 'r':
                 showroute = true;
                 break;
@@ -119,49 +108,16 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
                     usage(argv[0]);
                 break;
             case 'D':
-                if (modules_enable_used) {
-                    ui->error("-D and -M options are not compatible\n");
-                    usage(argv[0]);
-                }
-                if (!modules_disable_used) {
-                    for (c=0; c < modcount; c++) mods[c] = XPROBE_MODULE_ENABLED;
-                    modules_disable_used = true;
-                }
-                errno = 0;
-		if ((mod_to_disable = xmh->modbyname(optarg)) == -1)
-			mod_to_disable = strtol(optarg, NULL, 0);
-                if (errno == ERANGE && (mod_to_disable == LONG_MAX || mod_to_disable == LONG_MIN)) {
-                    ui->error("Incorrect module number specified %s\n", optarg);
-                    usage(argv[0]);
-                } else if (mod_to_disable < 1 || mod_to_disable > modcount) {
-                    ui->error("Module number %d is incorrect, must be in range from 1 to %d\n",mod_to_disable, modcount);
-                    usage(argv[0]);
-                }
-                mods[mod_to_disable-1] = XPROBE_MODULE_DISABLED;    
+                modules_disabled = true;
+                add_disabled(optarg);
+                ui->msg("Unspecified modules enabled");
                 break;
-                
+
             case 'M':
-                if (modules_disable_used) {
-                    ui->error("-D and -M options are not compatible\n");
-                    usage(argv[0]);
-                }
-                if (!modules_enable_used) {
-                    for (c=0; c < modcount; c++) mods[c] = XPROBE_MODULE_DISABLED;
-                    modules_enable_used = true;
-                }
-                errno = 0;
-		if ((mod_to_enable = xmh->modbyname(optarg)) == -1)
-			mod_to_enable = strtol(optarg, NULL, 0);
-                if (errno == ERANGE && (mod_to_enable == LONG_MAX || mod_to_enable == LONG_MIN)) {
-                    ui->error("Incorrect module number specified %s\n", optarg);
-                    usage(argv[0]);
-                } else if (mod_to_enable < 1 || mod_to_enable > modcount) {
-                    ui->error("Module number %d is incorrect, must be in range from 1 to %d\n",mod_to_enable, modcount);
-                    usage(argv[0]);
-                }
-                mods[mod_to_enable-1] = XPROBE_MODULE_ENABLED;    
+                modules_disabled = false;
+                add_disabled(optarg);
                 break;
-    
+
             case 'm':
                 errno = 0;
                 numofmatches = strtol(optarg, NULL, 0);
@@ -169,7 +125,7 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
                     ui->error("Incorrect number of matches to display specified %s\n", optarg);
                     usage(argv[0]);
                 } else if (numofmatches < 1) {
-                    ui->error("Are you sure you know what this program is doing? Number of matches must be greater than 0\n");
+                    ui->error("Number of matches must be greater than 0\n");
                     usage(argv[0]);
                 }
                 break;
@@ -183,13 +139,13 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
             case 'U':
                 if (parse_range(optarg, &udp_ports_toscan)) {
                     ui->msg("-U syntax error: %s\n", optarg);
-                    usage(argv[0]);    
+                    usage(argv[0]);
                 }
 				portscan = true;
                 break;
             case 'f':
                 rtt_forced = true;
-                break;    
+                break;
 			case 'F':
 				sgen = true;
 				break;
@@ -216,7 +172,7 @@ int Cmd_Opts::parse(int argc, char *argv[]) {
 
     if (argc < optind + 1)
         usage(argv[0]);
-    target = argv[optind];    
+    target = argv[optind];
 
 return 1;
 }
@@ -260,14 +216,14 @@ bool Cmd_Opts::show_route(void) {
 int Cmd_Opts::parse_port (char *portptr) {
 
     string portstr(portptr);
-    int iportnum = 0; 
+    int iportnum = 0;
     char istate = 0;
     vector<string> tokens;
 
     /* max len = strlen("tcp:65535:closed"); */
     if (portstr.length() > 16) {
         ui->error("-p syntax error (toolong ?)\n");
-        return FAIL;    
+        return FAIL;
     }
 
     if(xp_lib::tokenize(portptr, ':', &tokens)) {
@@ -276,13 +232,13 @@ int Cmd_Opts::parse_port (char *portptr) {
     }
     if (tokens.size() != 3){    /* either not enough or too many */
         ui->error ("-p syntax error (Not enought or too many \":\"\'s? %d)\n", tokens.size());
-        return FAIL;    
+        return FAIL;
     }
     if (!(iportnum = atoi(tokens[1].c_str())) || iportnum > 65535 || iportnum < 1) {
         ui->error("-p syntax error (Incorrect port number specification)\n");
         return FAIL;
     }
-    
+
     if (!strncasecmp(tokens[2].c_str(), "open", 4))
         istate = XPROBE_TARGETP_OPEN;
     else if (!strncasecmp(tokens[2].c_str(), "closed", 6))
@@ -292,7 +248,7 @@ int Cmd_Opts::parse_port (char *portptr) {
         return FAIL;
     }
 
-    if (!strncasecmp(tokens[0].c_str(), "tcp", 3)) 
+    if (!strncasecmp(tokens[0].c_str(), "tcp", 3))
         tcp_ports.insert(pair<int, char>(iportnum, istate));
     else if (!strncasecmp(tokens[0].c_str(), "udp", 3))
         udp_ports.insert(pair<int, char>(iportnum, istate));
@@ -302,7 +258,7 @@ int Cmd_Opts::parse_port (char *portptr) {
     }
 
     return OK;
-    
+
 }
 
 map <int, char> *Cmd_Opts::get_tcp_ports(void) {
@@ -331,19 +287,31 @@ Cmd_Opts::Cmd_Opts(void) {
     numofmatches = DEFAULT_MATCHES;
     portscan = false;
     rtt_forced = false;
-    modules_disable_used = modules_enable_used = analyze_samples = false;
+    modules_disabled = true;
+    analyze_samples = false;
 	sgen = false;
 	xml = false;
 	brute_force_tcp_ports = false;
 }
 
-bool Cmd_Opts::mod_is_disabled(int modnum) {
+bool Cmd_Opts::is_mod_disabled(char *nm) {
+    list <string>::iterator m_i;
 
-    if (modnum > 0 && modnum <= xmh->get_module_count())
-        if (mods[modnum-1])
-            return true;
-    return false;
+
+    m_i = find(disabled_mods.begin(), disabled_mods.end(),string(nm));
+    if (m_i != disabled_mods.end())
+        return this->modules_disabled;
+    return !(this->modules_disabled);
 }
+
+void Cmd_Opts::add_disabled(char *nm) {
+    list <string>::iterator m_i;
+
+    m_i = find(disabled_mods.begin(), disabled_mods.end(),string(nm));
+    if (m_i == disabled_mods.end())
+        disabled_mods.push_back(string(nm));
+}
+
 
 long Cmd_Opts::get_numofmatches() {
 
@@ -356,8 +324,8 @@ int Cmd_Opts::parse_range(char *arg, vector<Port_Range> *vec) {
     u_short hi, lo;
     unsigned int k;
     /* first we need to split
-     * the input into entries 
-     * separated by commas, 
+     * the input into entries
+     * separated by commas,
      * then we parse each entry
      * and see if range was
      * specified
@@ -377,13 +345,13 @@ int Cmd_Opts::parse_range(char *arg, vector<Port_Range> *vec) {
             vec->push_back(range);
         } else {
             //range specified
-            //tokenize it 
+            //tokenize it
 				xp_lib::tokenize(tokens[k].c_str(), '-', &range_tokens);
-            if (range_tokens.size() != 2) 
+            if (range_tokens.size() != 2)
                 return FAIL;
             errno = 0;
             lo = strtol(range_tokens[0].c_str(), NULL, 0);
-            if (errno == ERANGE || lo == 0) 
+            if (errno == ERANGE || lo == 0)
                 return FAIL;
             errno = 0;
             hi = strtol(range_tokens[1].c_str(), NULL, 0);

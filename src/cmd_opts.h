@@ -24,11 +24,6 @@
 
 #include "xprobe.h"
 #include "target.h"
-/*
-#include <map>
-#include <string>
-#include <vector>
-*/
 
 using namespace std;
 
@@ -37,7 +32,7 @@ class Cmd_Opts {
         Xprobe::Timeval receive_timeout;
         Xprobe::Timeval send_delay;
         char verbose;
-        bool modules_disable_used, modules_enable_used;
+        bool modules_disabled;
         char flags;
         char *logfile;
         char *config_file;
@@ -49,7 +44,7 @@ class Cmd_Opts {
 		map <int, char> udp_ports;
 		vector <Port_Range> tcp_ports_toscan;
 		vector <Port_Range> udp_ports_toscan;
-		int *mods;
+        list <string> disabled_mods;
 		long numofmatches;
 		int parse_port(char *);
 		int parse_range(char *, vector<Port_Range> *);
@@ -67,8 +62,9 @@ class Cmd_Opts {
 		bool show_route(void);
 		map <int, char> *get_tcp_ports(void);
 		map <int, char> *get_udp_ports(void);
-		bool mod_is_disabled(int);
+		bool is_mod_disabled(char *);
 		long get_numofmatches();
+        void add_disabled(char *);
 		bool do_portscan() { return portscan; }
         bool is_rtt_forced() { return rtt_forced; }
 		bool generate_sig() { return sgen; }

@@ -1,3 +1,16 @@
+2009-06-15 fygrave
+    * major changes to the code including:
+    1. Code style. Refactored and removed alot of C'isms. More to cme.
+    2. Code practices - no code should use pointers, new/delete stuff. Everything
+    has to be done by reference or value. Simple?
+    3. Simplified quite a number of complicated bits 
+    4. Deployed new module execution algorithm. Now it is adaptive and doesn't require
+    modules to be groupped by functionality.
+    Module groups are still used to handle special requests (i.e. collect info before
+    executing stuff), but module groups are not critical anymore.
+    5. Data requirements and information gain are used as primary parameters to schedule modules
+    6. Intoduced application modules and new-parallelized model of module execution. This will be back-ported to all the other modules with time.
+
 2005-07-26  mederchik
 
 	* man page updated with example on using SNMP module

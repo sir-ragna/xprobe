@@ -32,8 +32,8 @@ extern Xprobe_Module_Hdlr     *xmh;
 
 int Config_Line::read_line(FILE *fd) {
     char *buf;
-    
-    buf = (char *)calloc(XP_CONFIG_LINEMAX+1, 1); 
+
+    buf = (char *)calloc(XP_CONFIG_LINEMAX+1, 1);
 
     if ((buf = fgets(buf, XP_CONFIG_LINEMAX, fd)) == NULL)
         return FAIL; /* EOF or whatever */
@@ -49,9 +49,9 @@ const string Config_Line::trim_comments(string &l) {
     int p;
 
     p = l.find('#', 0);
-    if (p != -1) 
+    if (p != -1)
         l.replace(p, l.length() - p, "");
-    
+
     return l;
 }
 
@@ -60,13 +60,13 @@ const string Config_Line::trim_whitespc(string &l) {
 	string::size_type p;
 
     p = l.find_first_not_of("\n\r\t\v ");
-    if (p != string::npos) 
+    if (p != string::npos)
         l.replace(0, p, "");
-        
+
     p = l.find_last_not_of("\n\r\t\v ");
-    if (p != string::npos) 
+    if (p != string::npos)
         l.replace(p + 1, l.length() - p, "");
- 
+
     return l;
 }
 
@@ -81,13 +81,13 @@ int Config_Line::get_tokid(void) {
      * or option. Let Config_File deal with it.
      */
     return XP_CONFIG_TK_OPT;
-} 
+}
 
 
 
 Config_SectionB::Config_SectionB(const string &l): Config_Line(l) {
 	string::size_type p;
-    
+
     p = l.find_first_of(" \n\r\t\v{");
     if (p != string::npos)
         sec_name = l.substr(0, p);
@@ -96,7 +96,7 @@ Config_SectionB::Config_SectionB(const string &l): Config_Line(l) {
 
 Config_KeyVal::Config_KeyVal(const string &l): Config_Line(l) {
 	string::size_type p;
-    
+
     p = l.find_first_of(" \n\r\t\v=");
     if (p != string::npos)
         key = l.substr(0, p);
@@ -105,7 +105,7 @@ Config_KeyVal::Config_KeyVal(const string &l): Config_Line(l) {
         inc_error();
         return;
     }
-            
+
     // get value
     p = l.find_first_of("=");
 
@@ -170,12 +170,12 @@ int Config_Section::read_sec(void) {
                 add_key_val(kw.get_key(), kw.get_val());
                 /* section parse here..call parse stuff */
             }
-                break;     
+                break;
             case XP_CONFIG_TK_OPT:
                 set_option(line.get_line());
                 break;
             default:
-                ui->error("unknown token!\n");    
+                ui->error("unknown token!\n");
         }/* case */
     } /* while */
     return FAIL; /* EOF or somtheing */
@@ -188,11 +188,11 @@ void Config_Section::add_key_val(const string &key, const string &val) {
 }
 
 void Config_Section::set_option(const string &opt) {
-    
+
     options.push_back(opt);
 }
 
-int Config_Section::find_key(const string &k) { 
+int Config_Section::find_key(const string &k) {
     kv_i = key_val.find(k);
     if (kv_i == key_val.end()) return FAIL;
     return OK;
@@ -200,7 +200,7 @@ int Config_Section::find_key(const string &k) {
 
 
 int Config_File::open_cfg(void) {
-    
+
     if ((fd = fopen(filename.c_str(), "r")) == NULL)  {
         ui->error("error opening %s: %s\n", filename.c_str(),
                     strerror(errno));
@@ -247,12 +247,12 @@ int Config_File::process(char *fname) {
         ui->error("failed to close config file: %s\n", fname);
         return FAIL;
     }
- 
+
     return OK;
 }
 
 int Config_File::process_generic(Config_Section *sec) {
-    
+
     sec->reset_key();
     do {
         string key, val;
@@ -262,17 +262,17 @@ int Config_File::process_generic(Config_Section *sec) {
         /* set generic options here */
         if (key == "timeout") cfset->set_timeout(atoi(val.c_str()));
 		if (key == "community_strings") cfset->set_comstrings(val);
-        
+
         xprobe_debug(XPROBE_DEBUG_CONFIG,"\t\tKEY %s VAL %s\n",
                 key.c_str(), val.c_str());
     } while(sec->set_nextkey() != FAIL);
-  return OK;  
+  return OK;
 }
 
 
 int Config_File::process_fingerprint(Config_Section *sec) {
     int current_osid = -1;
-    
+
     sec->reset_key();
     do {
         string key, val;
@@ -284,32 +284,29 @@ int Config_File::process_fingerprint(Config_Section *sec) {
                         filename.c_str(), get_linenum(), val.c_str());
                 return FAIL;
             }
-            
+
         } else {
             if (current_osid == -1) {
                 ui->error("[%s:%i]: keyword %s appears before OS_ID\n",
                         filename.c_str(), get_linenum(), val.c_str());
                 return FAIL;
             }
-            Xprobe_Module *mod;
-            if ((mod = xmh->find_mod(key)) == NULL) {
+            if (xmh->parse_keyword(current_osid, key, val)) {
                 xprobe_debug(XPROBE_DEBUG_CONFIG,
                         "[x][%s:%i] No active module handles: %s keyword\n",
                         filename.c_str(), get_linenum(), key.c_str());
-            } else {
-                mod->parse_keyword(current_osid, key.c_str(), val.c_str());
             }
         } /* else OS_ID */
 
         xprobe_debug(XPROBE_DEBUG_CONFIG,"\t\tKEY %s VAL %s\n",
                 key.c_str(), val.c_str());
     } while(sec->set_nextkey() != FAIL);
-  return OK;  
+  return OK;
 }
 
 
 Config_File::Config_File(Config_Set *cfs) {
-    
+
     line_num = 0;
     fd = NULL;
     cfset = cfs;
@@ -318,7 +315,7 @@ Config_File::Config_File(Config_Set *cfs) {
 Config_Set::Config_Set(void) {
 
     cf = new Config_File(this);
-	showroute = false;    
+	showroute = false;
 }
 
 int Config_Set::read_config(char *fname) {

@@ -41,7 +41,7 @@ extern Cmd_Opts *copts;
 
 int icmp_ping_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    ICMP_Ping_Mod *module = new ICMP_Ping_Mod;
+    ICMP_Ping_Mod *module = new ICMP_Ping_Mod();
 
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the ICMP PING module\n");
     module->set_name(nm);
@@ -76,7 +76,7 @@ int ICMP_Ping_Mod::fini(void) {
 }
 
 int ICMP_Ping_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "Parsing for %i : %s  = %s\n",
                                                         os_id,  kwd, val);
     return OK;
@@ -110,7 +110,7 @@ int ICMP_Ping_Mod::do_icmp_ping(Target *tg) {
     icmpp.set_type(ICMP_ECHO);
     fflush(stderr);
     ret = -1;
-    
+
     icmpp.timeout(tv);
     sn.timeout(tv);
     t1 = Xprobe::Timeval::gettimeofday();
@@ -119,20 +119,20 @@ int ICMP_Ping_Mod::do_icmp_ping(Target *tg) {
     while (!done) {
         ret = sn.sniffpack(buf, sizeof(buf));
         /* packet response */
-        if (! sn.timeout() && sn.get_src() == remote.s_addr && 
+        if (! sn.timeout() && sn.get_src() == remote.s_addr &&
 			sn.get_type() == ICMP_ECHOREPLY && sn.get_icmpId() == icmpp_id) done = 1;
-        if (sn.timeout()) done = 1; /* timeout */    
+        if (sn.timeout()) done = 1; /* timeout */
     }
     t2 = Xprobe::Timeval::gettimeofday();
-    
+
     if (! sn.timeout()) {
 	    tt = t2 - t1;
-        if (tg->get_rtt() < tt) 
+        if (tg->get_rtt() < tt)
             tg->set_rtt(tt);
 	//if ((double)tg->get_rtt() <= 0.0)
 	//	tg->set_rtt(1.0);
         return 1;
     }
     return 0;
-    
+
 }

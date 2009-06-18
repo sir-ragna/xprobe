@@ -24,6 +24,8 @@
 
 #include "xprobe.h"
 #include "target.h"
+#include "xplib/xp_sha1.h"
+//#include "module_data.h"
 #include "os_matrix.h"
 #include "usi++/usi++.h"
 //#include <string>
@@ -33,17 +35,63 @@ using namespace std;
 #define XPROBE_MODULE_ALIVETEST     1
 #define XPROBE_MODULE_OSTEST        2
 #define XPROBE_MODULE_INFOGATHER	3
+class OsIdPair {
+private:
+    vector <int> osid;
+    unsigned char digest[20];
+public:
+    OsIdPair(void) {
+    }
+    OsIdPair(int i, string s) {
+        this->osid.push_back(i);
+        xp_SHA1 sha = xp_SHA1();
+        sha.get_digest(digest, (const u_char *)s.c_str(), s.length());
+    }
+    void add_osid(int i) {
+        osid.push_back(i);
+    }
+    OsIdPair & operator= (const OsIdPair &rhs) {
+        for (int i=0; i< 20; i++) {
+            this->digest[i] = rhs.digest[i];
+        }
+        this->osid = rhs.osid;
+    return *this;
+    }
+
+    bool operator== (const OsIdPair &rhs) {
+        for (int i=0; i< 20; i++) {
+        if (this->digest[i] != rhs.digest[i])
+            return false;
+        }
+    return true;
+    }
+};
+
 
 class Xprobe_Module {
     private:
+        vector<OsIdPair> gain;
         string name;
         string description;
         int mod_id;
         int mod_type;
 		bool enabled;
+        //Module_Data required;
+        //Module_Data provided;
 		virtual void generate_signature(Target *, ICMP *, ICMP *) { return; }
 		virtual void generate_signature(Target *, TCP *, TCP *) { return; }
    public:
+    void inc_gain(int osid, string s) {
+        OsIdPair p = OsIdPair(osid, s);
+        vector<OsIdPair>::iterator o_i;
+        for (o_i = gain.begin(); o_i != gain.end(); o_i++) {
+            if ((*o_i) == p) {
+                (*o_i).add_osid(osid);
+                return;
+            }
+        }
+        gain.push_back(p);
+    }
     void set_desc(const char *nm) { description = nm; }
     const char *get_desc(void) { return description.c_str(); }
     void set_name(const char *nm) { name = nm; }
@@ -58,10 +106,20 @@ class Xprobe_Module {
 	void enable(void) { enabled = true; }
 	void disable(void) { enabled = false; }
 	bool is_disabled(void) { return (enabled == false);};
-	bool operator<(Xprobe_Module& rhs) {
-		return this->getGain() < rhs.getGain();
-	}
-	virtual float getGain() { return 0; }
+
+    Xprobe_Module& operator=(Xprobe_Module& rhs) {
+        this->set_id(rhs.get_id());
+        this->set_type(rhs.get_type());
+        this->set_name(rhs.get_name());
+        this->set_desc(rhs.get_desc());
+        if (rhs.is_disabled()) {
+        this->disable();
+        } else {
+        this->enable();
+        }
+        return *this;
+    }
+	virtual float get_gain() { return gain.size(); }
     virtual ~Xprobe_Module(void) { return; }
     /* these to be overriden */
     virtual int init(void) =0;

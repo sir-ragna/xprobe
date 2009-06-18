@@ -57,7 +57,7 @@ int TCP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(remote));
-    
+
     tv = copts->get_timeout();
 
     if (tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN) == -1 &&
@@ -66,7 +66,7 @@ int TCP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
                 inet_ntoa(remote));
         return FAIL;
     }
-    if ((port = tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN)) == -1 ) 
+    if ((port = tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN)) == -1 )
         port = tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_CLOSED);
 
 	sn.init_device(tg->get_interface(), 0, 1500);
@@ -108,7 +108,7 @@ int TCP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
     if (ret > -1) {
         tt = t2 - t1;
         xprobe_debug(XPROBE_DEBUG_MODULES, "TCP PING response: %.7f\n", (double)tt);
-        if (tg->get_rtt() < tt) 
+        if (tg->get_rtt() < tt)
             tg->set_rtt(tt);
         os->add_result(get_id(), 1, XPROBE_MATCH_YES);
     } else {
@@ -124,7 +124,7 @@ int TCP_Ping_Mod::fini(void) {
 }
 
 int TCP_Ping_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "Parsing for %i : %s  = %s\n",
                                                         os_id,  kwd, val);
     return OK;
@@ -134,7 +134,7 @@ int TCP_Ping_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
 
 int tcp_ping_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    TCP_Ping_Mod *module = new TCP_Ping_Mod;
+    TCP_Ping_Mod *module = new TCP_Ping_Mod();
 
     module->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the TCP PING module\n");

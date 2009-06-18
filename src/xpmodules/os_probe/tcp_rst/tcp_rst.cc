@@ -34,7 +34,7 @@ extern Interface *ui;
 extern Cmd_Opts *copts;
 
 int tcp_rst_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
-	TCP_Rst_Mod *rst = new TCP_Rst_Mod;
+	TCP_Rst_Mod *rst = new TCP_Rst_Mod();
 	rst->set_name(nm);
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the TCP RST module\n");
 	pt->register_module(rst);
@@ -74,7 +74,7 @@ TCP_Rst_Mod::~TCP_Rst_Mod(void) {
 
 int TCP_Rst_Mod::parse_keyword(int os_id, const char *kwd, const char *val) {
 	map<string, Xprobe_Module_Param_TCP *>::iterator m_i;
-	
+
 	if ((m_i = kwd_chk.find(kwd)) == kwd_chk.end()) {
 		ui->error("%s: unknown keyword %s", get_name(), kwd);
 		return FAIL;
@@ -94,7 +94,7 @@ int TCP_Rst_Mod::exec(Target *tg, OS_Matrix *os) {
 	struct in_addr local = tg->get_interface_addr(), remote = tg->get_addr();
 	struct timeval tv;
 	map<string, Xprobe_Module_Param_TCP *>::iterator m_i;
-	
+
 	TCP request(inet_ntoa(remote));
 	TCP sn(inet_ntoa(local)), sample1(inet_ntoa(local));
 
@@ -123,7 +123,7 @@ int TCP_Rst_Mod::exec(Target *tg, OS_Matrix *os) {
 
 	request.sendpack("");
 	while (!done) {
-		ret = sn.sniffpack(buf, sizeof(buf));	
+		ret = sn.sniffpack(buf, sizeof(buf));
 		if (!sn.timeout()) {
 			if (sn.get_src() == remote.s_addr && request.get_dstport() == sn.get_srcport() &&
 					request.get_srcport() == sn.get_dstport()) {
@@ -140,7 +140,7 @@ int TCP_Rst_Mod::exec(Target *tg, OS_Matrix *os) {
 				request.set_id(rand());
 				request.set_seq(rand());
 				request.set_tcpsum(0);
-				done = 0;	
+				done = 0;
 				sn.timeout(tv);
 				request.sendpack("");
 				second_packet=true;
@@ -196,7 +196,7 @@ void TCP_Rst_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig, TCP *seco
 		value="0";
 	}
 	tg->signature(keyword.c_str(), value.c_str());
-	keyword= "tcp_rst_ip_id_1";	
+	keyword= "tcp_rst_ip_id_1";
 	if (pack->get_id() == 0) {
 		value="0";
 	} else if (pack->get_id() == orig->get_id()) {
@@ -205,7 +205,7 @@ void TCP_Rst_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig, TCP *seco
 		value = "!0";
 	}
 	tg->signature(keyword.c_str(), value.c_str());
-	keyword= "tcp_rst_ip_id_2";	
+	keyword= "tcp_rst_ip_id_2";
 	tg->signature(keyword.c_str(), value.c_str());
 	keyword="tcp_rst_ttl";
 	ttl = pack->get_ttl() + tg->get_distance();
@@ -231,7 +231,7 @@ void TCP_Rst_Mod::generate_signature(Target *tg, TCP *pack, TCP *orig, TCP *seco
 		value = "0";
 	}
 	tg->signature(keyword.c_str(), value.c_str());
-	
+
 }
 
 int TCP_Rst_Mod::fini(void) {

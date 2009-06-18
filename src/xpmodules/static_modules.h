@@ -38,6 +38,8 @@ extern int portscan_mod_init(Xprobe_Module_Hdlr *, char *);
 extern int tcp_rst_mod_init(Xprobe_Module_Hdlr *, char *);
 extern int smb_mod_init(Xprobe_Module_Hdlr *, char *);
 extern int snmp_mod_init(Xprobe_Module_Hdlr *, char *);
+extern int ftp_mod_init(Xprobe_Module_Hdlr *, char *);
+extern int http_mod_init(Xprobe_Module_Hdlr *, char *);
 
 
 
@@ -61,6 +63,8 @@ xprobe_module_func_t mod_init_funcs[]= {
 	{"fingerprint:tcp_rst", tcp_rst_mod_init},
 	{"app:smb", smb_mod_init},
 	{"app:snmp", snmp_mod_init},
+	{"app:ftp", ftp_mod_init},
+	{"app:http", http_mod_init},
 	{NULL, NULL}
 };
 

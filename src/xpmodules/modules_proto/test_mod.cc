@@ -52,7 +52,7 @@ int Test_Mod::fini(void) {
 }
 
 int Test_Mod::parse_keyword(int os_id, char *kwd, char *val)  {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "Parsing for %i : %s  = %s\n",
                                                         os_id,  kwd, val);
     return OK;
@@ -60,9 +60,10 @@ int Test_Mod::parse_keyword(int os_id, char *kwd, char *val)  {
 
 /* initialization function */
 
-int test_mod_init(Xprobe_Module_Hdlr *pt) {
+int test_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    Test_Mod *test_mod = new Test_Mod;
+    Test_Mod *test_mod = new Test_Mod();
+    test_mod->set_name(nm);
 
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the test module\n");
     pt->register_module(test_mod);

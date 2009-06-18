@@ -34,7 +34,7 @@ extern Interface *ui;
 extern Cmd_Opts *copts;
 
 int smb_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
-	SMB_Mod *smb= new SMB_Mod;
+	SMB_Mod *smb= new SMB_Mod();
 	smb->set_name(nm);
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the SMB module\n");
 	pt->register_module(smb);
@@ -83,7 +83,7 @@ int SMB_Mod::parse_keyword(int os_id, const char *kwd, const char *val) {
 	if (iter == smb_fingerprints.end()) {
 		smb_fingerprints.insert(pair<int, SMBFingerprint *>(os_id, fingerprint));
 	}
-	return OK;
+	return XPROBE_MODULE_PARAM_STRING;
 }
 
 int SMB_Mod::init(void) {

@@ -223,5 +223,7 @@ src/xpmodules/os_probe/tcp_handshake/Makefile
 src/xpmodules/os_probe/tcp_rst/Makefile
 src/xpmodules/os_probe/smb/Makefile
 src/xpmodules/os_probe/snmp/Makefile
+src/xpmodules/os_probe/http/Makefile
+src/xpmodules/os_probe/ftp/Makefile
 src/pxprobe/Makefile
 ])

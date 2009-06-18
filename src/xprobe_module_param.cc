@@ -27,7 +27,7 @@
 extern Interface *ui;
 
 int Xprobe_Module_Param::sig_insert(int os_id, xprobe_module_param_t p) {
-                if (osid_sig.find(os_id) != osid_sig.end()) 
+                if (osid_sig.find(os_id) != osid_sig.end())
                     return FAIL;
             osid_sig.insert(pair <int, xprobe_module_param_t>(os_id, p));
             return OK;
@@ -41,7 +41,7 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
 	vector <int> *vec_ptr;
 
     for (sig_i = osid_sig.begin(); sig_i != osid_sig.end(); sig_i++) {
-    
+
             switch (type) {
 
                 case XPROBE_MODULE_PARAM_BOOL:
@@ -83,10 +83,10 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
 						}
                         break;
                     } else {
-                        
+
                         if ((*sig_i).second.low < param && param <= (*sig_i).second.high)
                             os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
-                        else    
+                        else
                             os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_NO);
                         break;
                     }
@@ -94,13 +94,13 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
                 case XPROBE_MODULE_PARAM_INT:
                     if ((*sig_i).second.low < param && param < (*sig_i).second.high)
                         os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
-                    else    
+                    else
                         os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_NO);
 					break;
-	
+
 				case XPROBE_MODULE_PARAM_INTLIST:
 					vec_ptr = &((*sig_i).second.val_list);
-					for (ix = 0; ix < vec_ptr->size(); ix++) {						
+					for (ix = 0; ix < vec_ptr->size(); ix++) {
 						if (param == (*vec_ptr)[ix]) {
 							os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
 							break;
@@ -116,7 +116,7 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
 						os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
 					else if (id_diff > 0 && id_diff <= XMP_STRATEGY_THRESHOLD && (*sig_i).second.low == XMP_STRATEGY_INCREMENTAL)
 						os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
-					else if (id_diff == 0 && (*sig_i).second.low == XMP_STRATEGY_ZERO) 
+					else if (id_diff == 0 && (*sig_i).second.low == XMP_STRATEGY_ZERO)
 						os->add_result(get_id(), (*sig_i).first, XPROBE_MATCH_YES);
 					break;
                default:
@@ -126,7 +126,7 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
             } /* switch */
     } /* for */
     return OK;
-                
+
 }
 
 /* Lamye-arse parser.. will do it better later ;-) XXX */
@@ -141,31 +141,32 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
                 case '0':
                     p.low = 0;
                     sig_insert(os_id, p);
-                   return OK;
+                   break;
                 case '!':
                     p.low = 1;
                     sig_insert(os_id, p);
-                    return OK;
+                    break;
                 case 'y':
                     p.low = 1;
                     sig_insert(os_id, p);
-                    return OK;
+                    break;
                 case 'n':
                     p.low = 0;
                     sig_insert(os_id, p);
-                    return OK;        
+                    break;
 				case 'S':
 				case 's':
-					if (type == XPROBE_MODULE_PARAM_ZNZORIG && !(strncasecmp(param, "SENT", 4))) {
+					if (type == XPROBE_MODULE_PARAM_ZNZORIG
+                        && !(strncasecmp(param, "SENT", 4))) {
 						p.low = -1;
 						sig_insert(os_id, p);
-						return OK;
+						break;
 					}
                 default:
                     ui->msg("xprobe_param module:  unknown value %s\n", param);
+                    return FAIL;
             }
-            return FAIL;
-            /* unreach */
+
             break;
 
 		case XPROBE_MODULE_PARAM_ZNZVAL:
@@ -180,7 +181,6 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
 				}
 			}
 			sig_insert(os_id, p);
-			return OK;
 			break;
 
         case XPROBE_MODULE_PARAM_INT:
@@ -193,7 +193,6 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
                 p.low = atoi(param) - 1; p.high = atoi(param) + 1;
             }
 			sig_insert(os_id, p);
-            return OK;
             break;
 		case XPROBE_MODULE_PARAM_INTLIST:
 			if (xp_lib::tokenize(param, ',', &p.val_list) == FAIL) {
@@ -201,7 +200,6 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
 				return FAIL;
 			}
 			sig_insert(os_id, p);
-			return OK;
 			break;
 		case XPROBE_MODULE_PARAM_STRATEGY:
 			switch(param[0]) {
@@ -219,12 +217,12 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
 					return FAIL;
 			}
 			sig_insert(os_id, p);
-			return OK;
 			break;
         default:
             ui->msg("Xprobe_Module_Param::parse_param(): oops.. something fucked up!\n");
+            return FAIL;
     }
-    return FAIL;
+    return type;
 }
 
 int Xprobe_Module_Param::gen_match(int cnt, OS_Matrix *os) {
@@ -233,7 +231,7 @@ int Xprobe_Module_Param::gen_match(int cnt, OS_Matrix *os) {
 
 	if (cnt < 0)
 		return OK;
-	for (sig_i = osid_sig.begin(); sig_i != osid_sig.end(); sig_i++) 
+	for (sig_i = osid_sig.begin(); sig_i != osid_sig.end(); sig_i++)
 		for (i=0; i < cnt; i++)
 			os->add_result(get_id(), sig_i->first, XPROBE_MATCH_YES);
 	return OK;

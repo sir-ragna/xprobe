@@ -36,7 +36,7 @@ extern Cmd_Opts *copts;
 extern Config_Set *cfg;
 
 int snmp_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
-	SNMP_Mod *snmp= new SNMP_Mod;
+	SNMP_Mod *snmp = new SNMP_Mod();
 	snmp->set_name(nm);
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the SNMP module\n");
 	pt->register_module(snmp);
@@ -57,7 +57,7 @@ int SNMP_Mod::parse_keyword(int os_id, const char *kwd, const char *val) {
 
 	xprobe_debug(XPROBE_DEBUG_SIGNATURES, "Parsing for %i : %s  = %s\n", os_id, kwd, val);
 	sysdescrs.insert(pair<int, string>(os_id, descr));
-	return OK;
+	return XPROBE_MODULE_PARAM_STRING;
 }
 
 int SNMP_Mod::init(void) {
@@ -188,9 +188,9 @@ int SNMP_Mod::exec(Target *tg, OS_Matrix *os) {
 				os->add_result(get_id(), iter->first, XPROBE_MATCH_YES);
 			}
 		}
-		
+
 		break;
-	}	
+	}
 	close(sock);
 	return OK;
 }

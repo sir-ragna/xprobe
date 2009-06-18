@@ -63,7 +63,7 @@ int Scan_Engine::run(void) {
                                   (double)tg->get_rtt());
         }
         if (copts->do_portscan()) {
-            ui->msg("[+] Initial Information Gathering forced");
+            ui->msg("[+] Initial Information Gathering forced\n");
             tg->gather_info();
         }
         tg->scan();

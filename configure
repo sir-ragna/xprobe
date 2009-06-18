@@ -5598,7 +5598,7 @@ fi
 subdirs="$subdirs "libs-external/USI++/src""
 
 
-ac_config_files="$ac_config_files Makefile src/defines.h src/Makefile src/xplib/Makefile src/xpmodules/Makefile src/xpmodules/alive_probe/Makefile src/xpmodules/alive_probe/ttl_calc/Makefile src/xpmodules/alive_probe/portscanner/Makefile src/xpmodules/os_probe/Makefile src/xpmodules/os_probe/icmp_echo_id/Makefile src/xpmodules/os_probe/icmp_timestamp/Makefile src/xpmodules/os_probe/icmp_addrmask/Makefile src/xpmodules/os_probe/icmp_inforeq/Makefile src/xpmodules/os_probe/icmp_port_unreach/Makefile src/xpmodules/os_probe/tcp_handshake/Makefile src/xpmodules/os_probe/tcp_rst/Makefile src/xpmodules/os_probe/smb/Makefile src/xpmodules/os_probe/snmp/Makefile src/pxprobe/Makefile"
+ac_config_files="$ac_config_files Makefile src/defines.h src/Makefile src/xplib/Makefile src/xpmodules/Makefile src/xpmodules/alive_probe/Makefile src/xpmodules/alive_probe/ttl_calc/Makefile src/xpmodules/alive_probe/portscanner/Makefile src/xpmodules/os_probe/Makefile src/xpmodules/os_probe/icmp_echo_id/Makefile src/xpmodules/os_probe/icmp_timestamp/Makefile src/xpmodules/os_probe/icmp_addrmask/Makefile src/xpmodules/os_probe/icmp_inforeq/Makefile src/xpmodules/os_probe/icmp_port_unreach/Makefile src/xpmodules/os_probe/tcp_handshake/Makefile src/xpmodules/os_probe/tcp_rst/Makefile src/xpmodules/os_probe/smb/Makefile src/xpmodules/os_probe/snmp/Makefile src/xpmodules/os_probe/http/Makefile src/xpmodules/os_probe/ftp/Makefile src/pxprobe/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6213,6 +6213,8 @@ do
     "src/xpmodules/os_probe/tcp_rst/Makefile") CONFIG_FILES="$CONFIG_FILES src/xpmodules/os_probe/tcp_rst/Makefile" ;;
     "src/xpmodules/os_probe/smb/Makefile") CONFIG_FILES="$CONFIG_FILES src/xpmodules/os_probe/smb/Makefile" ;;
     "src/xpmodules/os_probe/snmp/Makefile") CONFIG_FILES="$CONFIG_FILES src/xpmodules/os_probe/snmp/Makefile" ;;
+    "src/xpmodules/os_probe/http/Makefile") CONFIG_FILES="$CONFIG_FILES src/xpmodules/os_probe/http/Makefile" ;;
+    "src/xpmodules/os_probe/ftp/Makefile") CONFIG_FILES="$CONFIG_FILES src/xpmodules/os_probe/ftp/Makefile" ;;
     "src/pxprobe/Makefile") CONFIG_FILES="$CONFIG_FILES src/pxprobe/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

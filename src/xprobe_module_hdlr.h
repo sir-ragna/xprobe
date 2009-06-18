@@ -50,14 +50,8 @@ class Xprobe_Module_Hdlr {
         void add_keyword(int, char *);
 		int get_module_count();
 		int modbyname(char *nm);
-		bool mod_disabled_by_default(unsigned int ix) {
-			unsigned int disabled_mods[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-			if (ix < sizeof(disabled_mods))
-				return (disabled_mods[ix] == 1);
-			else
-				return false;
-		}
-        Xprobe_Module *find_mod(string &);
+        vector<Xprobe_Module *>::iterator mod_by_type(int);
+        bool parse_keyword(int, string &, string &);
         Xprobe_Module_Hdlr(void);
         ~Xprobe_Module_Hdlr(void);
 };

@@ -40,7 +40,7 @@ extern Interface *ui;
 
 int icmp_echo_id_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    ICMP_Echo_Id_Mod *module = new ICMP_Echo_Id_Mod;
+    ICMP_Echo_Id_Mod *module =  new ICMP_Echo_Id_Mod();
 
     module->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the ICMP ECHO ID module\n");
@@ -55,8 +55,8 @@ int icmp_echo_id_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 return OK;
 }
 
-ICMP_Echo_Id_Mod::ICMP_Echo_Id_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, "fingerprint:icmp_echo","ICMP Echo request fingerprinting module") { 
-    
+ICMP_Echo_Id_Mod::ICMP_Echo_Id_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, "fingerprint:icmp_echo","ICMP Echo request fingerprinting module") {
+
     ICMP_Echo_Code_Chk *iecc = new ICMP_Echo_Code_Chk;
     ICMP_Echo_Id_Chk   *ieic = new ICMP_Echo_Id_Chk;
     ICMP_Echo_Tos_Chk  *ietc = new ICMP_Echo_Tos_Chk;
@@ -70,7 +70,7 @@ ICMP_Echo_Id_Mod::ICMP_Echo_Id_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, "f
     kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_echo_tos_bits", ietc));
     kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_echo_df_bit", iedbc));
     kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_echo_reply_ttl", iertc));
-    
+
     return;
 }
 
@@ -78,9 +78,9 @@ ICMP_Echo_Id_Mod::~ICMP_Echo_Id_Mod(void) {
     map <string, Xprobe_Module_Param_ICMP *>::iterator s_i;
 
 /* free check objects */
-    for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++) 
+    for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++)
         delete (*s_i).second;
-    
+
 }
 
 int ICMP_Echo_Id_Mod::init(void) {
@@ -92,13 +92,13 @@ int ICMP_Echo_Id_Mod::init(void) {
 
 int ICMP_Echo_Id_Mod::exec(Target *tg, OS_Matrix *os) {
     int ret;
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(tg->get_addr()));
 
     current_os = os;
     ret = do_icmp_ping(tg);
-    
+
     if (!ret) return FAIL;
     return OK;
 }
@@ -140,7 +140,7 @@ int ICMP_Echo_Id_Mod::parse_keyword(int os_id, const char *kwd, const char *val)
 	if ((s_i=kwd_chk.find(kwd)) != kwd_chk.end()) {
             return((*s_i).second->parse_param(os_id, val));
 	}
-    ui->msg("Ooops..none matched %s %s\n", kwd, val);   
+    ui->msg("Ooops..none matched %s %s\n", kwd, val);
     return FAIL;
 
 };
@@ -179,7 +179,7 @@ int ICMP_Echo_Id_Mod::do_icmp_ping(Target *tg) {
     icmpp.set_fragoff(IP_DF);
     fflush(stderr);
     ret = -1;
-    
+
     icmpp.timeout(tv);
     sn.timeout(tv);
 	ret = icmpp.send_ping_payload();
@@ -187,23 +187,23 @@ int ICMP_Echo_Id_Mod::do_icmp_ping(Target *tg) {
     while (!done) {
         ret = sn.sniffpack(buf, sizeof(buf));
         /* packet response */
-//        if (ret > 0 && sn.get_src() != local.s_addr 
-        if (!sn.timeout() && sn.get_src() == remote.s_addr && 
+//        if (ret > 0 && sn.get_src() != local.s_addr
+        if (!sn.timeout() && sn.get_src() == remote.s_addr &&
 			sn.get_type() == ICMP_ECHOREPLY && sn.get_icmpId() == icmpp_id) {
 			done = 1;
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Received reply.\n", get_name());
 		}
-//        if (ret < 1) done = 1; /* timeout */    
+//        if (ret < 1) done = 1; /* timeout */
         if (sn.timeout()) {
-			done = 1; /* timeout */    
+			done = 1; /* timeout */
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Timed out, no reply received.\n", get_name());
 		}
     }
-    
+
     if (! sn.timeout()) {
-        for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++) 
+        for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++)
             ((*s_i).second->check_param(&sn, &icmpp, current_os));
-        
+
 		if (tg->generate_sig())
 			generate_signature(tg, &sn, &icmpp);
         return OK;
@@ -227,7 +227,7 @@ void ICMP_Echo_Id_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) {
 		keyword = "icmp_echo_code";
 		if (pack->get_code() == 0)
 			value="0";
-		else 
+		else
 			value="!0";
 		tg->signature(keyword, value);
 		keyword= "icmp_echo_ip_id";
@@ -241,14 +241,14 @@ void ICMP_Echo_Id_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) {
 		keyword= "icmp_echo_tos_bits";
 		if (pack->get_tos() == 0)
 			value="0";
-		else 
+		else
 			value="!0";
 		tg->signature(keyword, value);
 		keyword = "icmp_echo_df_bit";
 		if (pack->get_fragoff() & IP_DF)
 			value = "1";
-		else 
-			value ="0";	
+		else
+			value ="0";
 		tg->signature(keyword, value);
 		keyword = "icmp_echo_reply_ttl";
 		ttl = pack->get_ttl() + tg->get_distance();
@@ -273,7 +273,7 @@ void ICMP_Echo_Id_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) {
 		tg->signature("icmp_echo_df_bit", "");
 		tg->signature("icmp_echo_reply_ttl", "");
 	}
-	
+
 
 }
 

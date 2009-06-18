@@ -146,4 +146,5 @@ extern "C" {
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <list>
 #endif /* XPROBE_H */

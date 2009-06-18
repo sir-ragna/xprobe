@@ -11,7 +11,7 @@ extern Interface *ui;
 extern Cmd_Opts *copts;
 
 int TTL_Mod::init (void) {
-	
+
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "[TTL_Mod]: Initialized\n");
 return OK;
 
@@ -29,7 +29,7 @@ int TTL_Mod::exec (Target *Tgt, OS_Matrix *osmtx) {
 		osmtx->add_result (get_id(), 1, XPROBE_MATCH_NO);
 		xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] TTL distance calculation failed\n", get_name());
 	}
-	
+
 	return OK;
 
 }
@@ -41,7 +41,7 @@ return OK;
 
 
 int TTL_Mod::parse_keyword(int os_id, const char *keyword, const char *value){
-    xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Parsing for %i : %s  = %s\n", 
+    xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Parsing for %i : %s  = %s\n",
 				get_name(), os_id, keyword, value);
 return OK;
 }
@@ -50,7 +50,7 @@ return OK;
 
 int ttl_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-	TTL_Mod *ttl_mod = new TTL_Mod;
+	TTL_Mod *ttl_mod = new TTL_Mod();
 
 	ttl_mod->set_name(nm);
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the TTL precalculation module\n");
@@ -88,7 +88,7 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 				inet_ntoa(tgt->get_addr()));
 		return FAIL;
 	}
-	
+
 	if (showroute)
 		ui->msg("[%s] Showing route to %s:\n", get_name(), inet_ntoa(tgt->get_addr()));
 	if ( (buf = (u_char *) malloc (BUFSIZE)) == NULL ) {
@@ -111,9 +111,9 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 	tcp.set_id(getrandom(U_INTMAX));
 	tcp.set_fragoff(IP_DF);
 
-	if (tgt->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN) != -1) 
+	if (tgt->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN) != -1)
 		tcp.set_dstport(tgt->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN));
-	else 		
+	else
 		tcp.set_dstport(tgt->get_port(IPPROTO_TCP, XPROBE_TARGETP_CLOSED));
 
 	snprintf(filter, sizeof(filter), "proto ICMP or src port %d", tcp.get_dstport());
@@ -130,9 +130,9 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 
 	// We are actually only information gathering module. So if rtt was calculated, the target system is dead
 	// therefore we don't run. Consider it to be dead. :)
-	
-	// for some reason smaller timeout timeouts too quickly :) 
-	timeo = ((double)tgt->get_rtt() * 5); // if not 0 
+
+	// for some reason smaller timeout timeouts too quickly :)
+	timeo = ((double)tgt->get_rtt() * 5); // if not 0
 
 	tcp.timeout(timeo);
 	udp.timeout(timeo);
@@ -147,20 +147,20 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 		} else {
 			udp.set_ttl(ttl_distance + 1);
 			udp.set_srcport (orig_sport);
-			udp.sendpack((char *)udppayload, sizeof(struct DNSHEADER));	
+			udp.sendpack((char *)udppayload, sizeof(struct DNSHEADER));
 		}
 		done = 0;
 		while (!done) {
-			retval = sn.sniffpack(buf, BUFSIZE);	
+			retval = sn.sniffpack(buf, BUFSIZE);
 			if (retval > 0 ) {
-				if (sn.get_proto() == IPPROTO_ICMP && 
+				if (sn.get_proto() == IPPROTO_ICMP &&
 					retval >= (int) (sizeof(struct ip) + sizeof (struct icmp_hdr) + 8)) {
 						icmph = (struct icmp_hdr *) buf;
 						// echoed IP header
 						iph = (struct ip *) (buf + sizeof (struct icmp_hdr));
 						// echoed 64-bits of transport layer data
 						memcpy(&echoed_sport, buf + (sizeof(struct icmp_hdr)+sizeof(struct ip)), sizeof(unsigned short));
-						memcpy(&echoed_dport, buf + (sizeof(struct icmp_hdr)+sizeof(struct ip)+sizeof(unsigned short)), 
+						memcpy(&echoed_dport, buf + (sizeof(struct icmp_hdr)+sizeof(struct ip)+sizeof(unsigned short)),
 									sizeof(unsigned short));
 						echoed_sport = ntohs(echoed_sport);
 						echoed_dport = ntohs(echoed_dport);
@@ -169,12 +169,12 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 							iph->ip_src.s_addr == local.s_addr &&
 							iph->ip_dst.s_addr == remote.s_addr) {
 
-								// check if it is really the ICMP packet for the 
+								// check if it is really the ICMP packet for the
 								// original packet sent
 								if (echoed_sport == orig_sport) {
 									if (showroute) {
 										gateway.s_addr = sn.get_src();
-										ui->msg("[x]   %d hop: %s [%s]\n", ttl_distance, 
+										ui->msg("[x]   %d hop: %s [%s]\n", ttl_distance,
 												sn.get_src(1, hname, MAXHOSTLEN),
 												inet_ntoa(gateway));
 										memset(hname, 0, MAXHOSTLEN);
@@ -220,7 +220,7 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 				if (tcptest == true && failures == 1) {
 					xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Switched to UDP test\n", get_name());
 					tcptest = false;
-					if (showroute) 
+					if (showroute)
 						ui->msg("[x]   %d hop: *\n", ttl_distance);
 					failures++;
 					done = 1;
@@ -229,7 +229,7 @@ int TTL_Mod::get_ttl_distance(Target *tgt) {
 					xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Switching TCP test, now sending to closed port\n", get_name());
 					tcp.set_dstport(tgt->get_port(IPPROTO_TCP, XPROBE_TARGETP_CLOSED));
 					tcp.set_tcpsum(0);
-                    if (showroute)  
+                    if (showroute)
                         ui->msg("[x]   %d hop: *\n", ttl_distance);
 					failures++;
 					done = 1;

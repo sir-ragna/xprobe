@@ -39,7 +39,7 @@ extern Interface *ui;
 
 int icmp_addrmask_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    ICMP_Addrmask_Mod *module = new ICMP_Addrmask_Mod;
+    ICMP_Addrmask_Mod *module = new ICMP_Addrmask_Mod();
 
     module->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the ICMP Addrmask module\n");
@@ -52,7 +52,7 @@ return OK;
 }
 
 
-ICMP_Addrmask_Mod::ICMP_Addrmask_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, "fingerprint:icmp_amask","ICMP Address mask request fingerprinting module") { 
+ICMP_Addrmask_Mod::ICMP_Addrmask_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, "fingerprint:icmp_amask","ICMP Address mask request fingerprinting module") {
 
 	ICMP_Addrmask_Reply_Check *repchk = new ICMP_Addrmask_Reply_Check;
 	ICMP_Addrmask_Ip_Id_Check *ipidchk = new ICMP_Addrmask_Ip_Id_Check;
@@ -64,8 +64,8 @@ ICMP_Addrmask_Mod::ICMP_Addrmask_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, 
 }
 
 ICMP_Addrmask_Mod::~ICMP_Addrmask_Mod(void) {
-	
-	for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++) 
+
+	for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++)
 		delete s_i->second;
 }
 
@@ -77,13 +77,13 @@ int ICMP_Addrmask_Mod::init(void) {
 
 
 int ICMP_Addrmask_Mod::exec(Target *tg, OS_Matrix *os) {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(tg->get_addr()));
 
     current_os = os;
     do_icmp_query(tg);
-    
+
     return OK;
 }
 
@@ -121,7 +121,7 @@ int ICMP_Addrmask_Mod::do_icmp_query(Target *tg) {
     ICMP icmpp(inet_ntoa(remote));
     ICMP sn(inet_ntoa(local));
     sn.init_device(tg->get_interface(), 0, 1500);
- 
+
     tv = tg->get_rtt();
 
     icmpp.set_src(inet_ntoa(tg->get_interface_addr()));
@@ -129,7 +129,7 @@ int ICMP_Addrmask_Mod::do_icmp_query(Target *tg) {
     icmpp.set_type(ICMP_ADDRESS);
     fflush(stderr);
     ret = -1;
-    
+
     icmpp.timeout(tv);
     sn.timeout(tv);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Sending ICMP message\n");
@@ -140,19 +140,19 @@ int ICMP_Addrmask_Mod::do_icmp_query(Target *tg) {
         ret = sn.sniffpack(buf, sizeof(buf));
         xprobe_debug(XPROBE_DEBUG_MODULES, "Received %i bytes\n", ret);
         /* packet response */
-//        if (ret > 0 && sn.get_src() != local.s_addr 
-        if (!sn.timeout() && sn.get_src() == remote.s_addr 
+//        if (ret > 0 && sn.get_src() != local.s_addr
+        if (!sn.timeout() && sn.get_src() == remote.s_addr
             && sn.get_type() == ICMP_ADDRESSREPLY && sn.get_icmpId() == icmpp_id) {
 			done = 1;
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Received reply.\n", get_name());
 		}
-//        if (ret < 1) done = 1; /* timeout */    
+//        if (ret < 1) done = 1; /* timeout */
 		if (sn.timeout()) {
-			done = 1; 
+			done = 1;
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Timed out, no reply received.\n", get_name());
 		}
     }
-    
+
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Got good ICMP response\n");
 	for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++)
 		s_i->second->check_param(&sn, &icmpp, current_os);
@@ -168,7 +168,7 @@ void ICMP_Addrmask_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) {
 	unsigned int ttl;
 	/*
 #       icmp_addrmask_reply = [ y, n]
-#       icmp_addrmask_reply_ttl = [>< decimal num] 
+#       icmp_addrmask_reply_ttl = [>< decimal num]
 #       icmp_addrmask_reply_ip_id = [0, !0, SENT]
 	*/
 	if (!pack->timeout()) {

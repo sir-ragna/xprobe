@@ -22,7 +22,7 @@
 /*
  * Changes:
  *				-	Feb 12 14:34:04 2003 meder - added type XPROBE_MODULE_PARAM_ZNZORIG,
- *					that required addition of an extra argument to the add_param() and 
+ *					that required addition of an extra argument to the add_param() and
  *					check_param() methods;
  */
 #ifndef XPROBE_MODULE_PARAM_H
@@ -44,14 +44,15 @@ using namespace std;
 #define XPROBE_MODULE_PARAM_ZNZVAL		6		/* zero, value, not zero */
 #define XPROBE_MODULE_PARAM_INTLIST		7		/* list of integers (1,2,3,4,...) */
 #define XPROBE_MODULE_PARAM_STRATEGY	8		/* (R)andom, (I)ncremental, 0 */
-
+#define XPROBE_MODULE_PARAM_STRING      9       /* parameter is string */
 #define XPROBE_MODULE_PARAM_FUZZY_DELTA     31
 
 
 #define XMP_STRATEGY_RANDOM				2
 #define XMP_STRATEGY_INCREMENTAL		1
 #define XMP_STRATEGY_ZERO				0
-#define XMP_STRATEGY_THRESHOLD			256	
+#define XMP_STRATEGY_THRESHOLD			256
+
 
 typedef struct xprobe_module_param_val {
     int high;
@@ -70,7 +71,7 @@ class Xprobe_Module_Param {
     public:
         Xprobe_Module_Param(int t) { type = t; }
         virtual ~Xprobe_Module_Param(void) { return; }
-//        virtual int check_param(ICMP *ip_pkt, ICMP *orig_pkt, OS_Matrix *os) =0;    
+//        virtual int check_param(ICMP *ip_pkt, ICMP *orig_pkt, OS_Matrix *os) =0;
         int parse_param(int os_id, const char *param);
         int add_param(int param, int orig, OS_Matrix *os);
         void set_id(int i) { id = i; }

@@ -39,7 +39,7 @@ extern Interface *ui;
 
 int icmp_timestamp_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    ICMP_Timestamp_Mod *module = new ICMP_Timestamp_Mod;
+    ICMP_Timestamp_Mod *module = new ICMP_Timestamp_Mod();
 
     module->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the ICMP Timestamp module\n");
@@ -51,7 +51,7 @@ int icmp_timestamp_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 return OK;
 }
 
-ICMP_Timestamp_Mod::ICMP_Timestamp_Mod(void):Xprobe_Module(XPROBE_MODULE_OSTEST, 
+ICMP_Timestamp_Mod::ICMP_Timestamp_Mod(void):Xprobe_Module(XPROBE_MODULE_OSTEST,
 		"fingerprint:icmp_tstamp", "ICMP Timestamp request fingerprinting module") {
 	ICMP_Timestamp_Reply_Check *timrep = new ICMP_Timestamp_Reply_Check;
 	ICMP_Timestamp_Ip_Id_Check *timid = new ICMP_Timestamp_Ip_Id_Check;
@@ -76,13 +76,13 @@ int ICMP_Timestamp_Mod::init(void) {
 
 
 int ICMP_Timestamp_Mod::exec(Target *tg, OS_Matrix *os) {
-    
+
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(tg->get_addr()));
 
     current_os = os;
     do_icmp_query(tg);
-    
+
     return OK;
 }
 
@@ -127,7 +127,7 @@ int ICMP_Timestamp_Mod::do_icmp_query(Target *tg) {
     icmpp.set_type(ICMP_TIMESTAMP);
     fflush(stderr);
     ret = -1;
-    
+
     icmpp.timeout(tv);
     sn.timeout(tv);
 	ret = icmpp.send_timestamp_payload();
@@ -135,24 +135,24 @@ int ICMP_Timestamp_Mod::do_icmp_query(Target *tg) {
     while (!done) {
         ret = sn.sniffpack(buf, sizeof(buf));
         /* packet response */
-//        if (ret > 0 && sn.get_src() != local.s_addr 
-        if (!sn.timeout() && sn.get_src() == remote.s_addr 
+//        if (ret > 0 && sn.get_src() != local.s_addr
+        if (!sn.timeout() && sn.get_src() == remote.s_addr
             && sn.get_type() == ICMP_TIMESTAMPREPLY && sn.get_icmpId() == icmpp_id) {
 			done = 1;
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Received reply.\n", get_name());
 		}
-     //   if (ret < 1) done = 1; /* timeout */    
+     //   if (ret < 1) done = 1; /* timeout */
 		if (sn.timeout()) {
 			done = 1;
 			xprobe_debug(XPROBE_DEBUG_MODULES, "[%s] Timed out, no reply received.\n", get_name());
 		}
     }
-    
+
     /* do_response_check(ret);
-    if (ret > 0) 
+    if (ret > 0)
         do_ttl_check(sn.get_ttl());
 	*/
-	for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++) 
+	for (s_i = kwd_chk.begin(); s_i != kwd_chk.end(); s_i++)
 		s_i->second->check_param(&sn, &icmpp, current_os);
 	if (tg->generate_sig())
 		generate_signature(tg, &sn, &icmpp);
@@ -164,7 +164,7 @@ void ICMP_Timestamp_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) 
 	string keyword, value;
 	unsigned int ttl;
 
-/* 
+/*
 #       icmp_timestamp_reply = [ y, n]
 #       icmp_timestamp_reply_ttl = [>< decimal num]
 #       icmp_timestamp_reply_ip_id = [0, !0, SENT]
@@ -184,13 +184,13 @@ void ICMP_Timestamp_Mod::generate_signature(Target *tg, ICMP *pack, ICMP *orig) 
 			value.append("128");
 		else if (ttl <= 255)
 			value.append("255");
-		tg->signature(keyword, value);	
+		tg->signature(keyword, value);
 		keyword="icmp_timestamp_reply_ip_id";
 		if (pack->get_id() == 0)
 			value="0";
 		else if (pack->get_id() == orig->get_id())
 			value = "SENT";
-		else 
+		else
 			value = "!0";
 		tg->signature(keyword, value);
 	} else {

@@ -48,7 +48,7 @@ class TTL_Mod: public Xprobe_Module {
 	int getrandom(int limit);
     public:
 		/* constructor */
-        TTL_Mod(void) : Xprobe_Module(XPROBE_MODULE_ALIVETEST, "infogather:ttl_calc", "TCP and UDP based TTL distance calculation") { return; }
+        TTL_Mod(void) : Xprobe_Module(XPROBE_MODULE_INFOGATHER, "infogather:ttl_calc", "TCP and UDP based TTL distance calculation") { return; }
 		/* destructor */
         ~TTL_Mod(void) { return; }
         int init(void);

@@ -30,15 +30,20 @@ extern Interface *ui;
 extern Cmd_Opts *copts;
 extern XML_Log *xml;
 
+/* we need a function to sort xprobe_module objects by pointer. */
+
+bool compare_module(Xprobe_Module *lhs, Xprobe_Module* rhs) {
+		return lhs->get_gain() < rhs->get_gain();
+}
+
 int Xprobe_Module_Hdlr::load(void) {
-	int cnt=1;
     xprobe_module_func_t *ptr;
 
     ui->msg("[+] Loading modules.\n");
 
     ptr = mod_init_funcs;
     while (ptr !=NULL && ptr->name !=NULL && ptr->func !=NULL) {
-		if (!copts->mod_is_disabled(cnt++))
+		if (!copts->is_mod_disabled(ptr->name))
 			add(ptr->func, ptr->name);
 		ptr++;
 	}
@@ -47,42 +52,61 @@ int Xprobe_Module_Hdlr::load(void) {
 }
 
 int Xprobe_Module_Hdlr::init(void) {
+    vector <Xprobe_Module *>::iterator m_i;
 
-    for (unsigned int i=0; i< modlist.size(); i++) {
-    modlist[i]->init();
+    for (m_i = modlist.begin(); m_i != modlist.end(); m_i++) {
+    (*m_i)->init();
+    (*m_i)->enable();
     }
 
     return 1;
 }
 
 int Xprobe_Module_Hdlr::print(void) {
+    vector <Xprobe_Module *>::iterator m_i;
 
     ui->msg("[+] Following modules are loaded:\n");
 	xml->log(XPROBELOG_MOD_SESS_START, "Loaded modules");
-    for (unsigned int i=0; i<modlist.size(); i++) {
-        ui->msg("[x] [%d] %s  -  %s\n", modlist[i]->get_id(),
-			modlist[i]->get_name(), modlist[i]->get_desc());
-		xml->log(XPROBELOG_MSG_MODULE, "%t%n%d%s", modlist[i]->get_type(),
-				modlist[i]->get_name(), modlist[i]->get_id(), modlist[i]->get_desc());
+    for (m_i = modlist.begin(); m_i != modlist.end(); m_i++) {
+        ui->msg("[x]  %s  -  %s\n", (*m_i)->get_name(), (*m_i)->get_desc());
+		xml->log(XPROBELOG_MSG_MODULE, "%t%n%d%s", (*m_i)->get_type(),
+				(*m_i)->get_name(), (*m_i)->get_id(), (*m_i)->get_desc());
 	}
    ui->msg("[+] %i modules registered\n", modlist.size());
 	xml->log(XPROBELOG_MOD_SESS_END, "End modules");
    return 1;
 }
-int Xprobe_Module_Hdlr::gather_info(Target *tg) {
-    unsigned int i;
-
-    for (i =0; i< modlist.size(); i++) {
-        if(modlist[i]->get_type() == XPROBE_MODULE_INFOGATHER)
-            xprobe_debug(XPROBE_DEBUG_MODULES, "Executing Module %s\n",
-                         modlist[i]->get_name());
-            modlist[i]->exec(tg, (OS_Matrix *)NULL); // INFORMATION GATHERING MODULES don't need OS
+vector<Xprobe_Module *>::iterator   Xprobe_Module_Hdlr::mod_by_type(int type) {
+    vector<Xprobe_Module *>::iterator m_i;
+    for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
+        if ((*m_i)->get_type() == type && !(*m_i)->is_disabled()) {
+            return m_i;
+        }
     }
+    return modlist.end();
+}
+int Xprobe_Module_Hdlr::gather_info(Target *tg) {
+    OS_Matrix *os = new OS_Matrix(this->loaded_mods_num(XPROBE_MODULE_INFOGATHER));
+    vector <Xprobe_Module *>::iterator m_i;
+    m_i = this->mod_by_type(XPROBE_MODULE_INFOGATHER);
+    while(m_i != modlist.end()) {
+        xprobe_debug(XPROBE_DEBUG_MODULES, "Executing Module %s\n",
+                         (*m_i)->get_name());
+        (*m_i)->exec(tg, os); // INFORMATION GATHERING MODULES don't need OS
+        (*m_i)->disable();
+        m_i = this->mod_by_type(XPROBE_MODULE_INFOGATHER);
+    }
+    delete os;
     return 1;
 }
 
 int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
+    vector <Xprobe_Module *>::iterator m_i;
+    sort(modlist.begin(), modlist.end(), compare_module);
 
+    for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
+        cout << "module " << (*m_i)->get_name() << " " << (*m_i)->get_gain() << "\n";
+    }
     /*
      We have two lists. pending modules (waiting for data) and
      executable modules
@@ -121,8 +145,8 @@ int Xprobe_Module_Hdlr::fini(void) {
                         (*m_i)->get_id(), (*m_i)->get_name());
         (*m_i)->fini();
         delete (*m_i);
-        modlist.erase(m_i);
     }
+    modlist.erase(modlist.begin(), modlist.end());
 
 
     ui->msg("[+] Modules deinitialized\n");
@@ -136,7 +160,7 @@ int Xprobe_Module_Hdlr::add(int (*init_func)(Xprobe_Module_Hdlr *, char *), char
     return(init_func(this, nm));
 }
 
-int Xprobe_Module_Hdlr::register_module(Xprobe_Module *mod) {
+int Xprobe_Module_Hdlr::register_module(Xprobe_Module* mod) {
 
     mod_counter++;
     mod->set_id(mod_counter);
@@ -152,10 +176,7 @@ void Xprobe_Module_Hdlr::add_keyword(int id, char *str) {
    	keywords++;
 }
 
-/* XXX: temp plug. Supposed to return module ptr which is registered for
- * keyword kwd
- */
-Xprobe_Module *Xprobe_Module_Hdlr::find_mod(string &kwd) {
+bool Xprobe_Module_Hdlr::parse_keyword(int osid, string &kwd, string &val) {
     map <string, int>::iterator kw_i;
     vector<Xprobe_Module *>::iterator m_i;
 
@@ -164,7 +185,7 @@ Xprobe_Module *Xprobe_Module_Hdlr::find_mod(string &kwd) {
     if (kw_i == kwdlist.end()) {
         xprobe_debug(XPROBE_DEBUG_CONFIG,
                      "[x] failed to lookup module on %s keyword\n", kwd.c_str());
-        return NULL;
+        return false;
     }
 
     for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
@@ -172,11 +193,13 @@ Xprobe_Module *Xprobe_Module_Hdlr::find_mod(string &kwd) {
             xprobe_debug(XPROBE_DEBUG_CONFIG,
                          "[x] keyword: %s handled by module: %s\n", kwd.c_str(),
                          (*m_i)->get_name());
-            return (*m_i);
+            int range = (*m_i)->parse_keyword(osid, kwd.c_str(), val.c_str());
+            (*m_i)->inc_gain(osid, kwd + ":" + val);
+            return true;
         }
     }
-    ui->error("[x] failed to associate moudle id!\n");
-    return NULL;
+    ui->error("[x] failed to associate module id!\n");
+    return false;
 }
 
 int Xprobe_Module_Hdlr::loaded_mods_num(int mod_type) {

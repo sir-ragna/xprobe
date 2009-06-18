@@ -64,7 +64,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(tg->get_addr()));
 
-//	signal(SIGCHLD, child_handler); 
+//	signal(SIGCHLD, child_handler);
 	act.sa_handler= child_handler;
 	act.sa_flags = 0;
 	sigemptyset(&act.sa_mask);
@@ -103,7 +103,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 		/* UNEARCH: child never returns */
 	}
 	// everyone meets here
-	
+
 	if ((gettimeofday(&end, NULL)) < 0) {
 		ui->msg("Portscanner::exec gettimeofday failed\n");
 		return FAIL;
@@ -129,12 +129,12 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 				udp_ports.insert(pair<int, char>(j, XPROBE_TARGETP_FILTERED));
 			}
 	xml->log(XPROBELOG_PS_SESS_START, "%d", ((end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec)/1000)/1000.0);
-	
+
 	xml->log(XPROBELOG_STATS_SESS_START, "pscan stats");
 	ui->msg("\n[+] Portscan results for %s:\n", inet_ntoa(tg->get_addr()));
 	ui->msg("[+]  Stats:\n");
 	ui->msg("[+]   TCP: %d - open, %d - closed, %d - filtered\n", tcpopen, tcpclosed, tcpfiltered);
-	xml->log(XPROBELOG_MSG_PS_TCPST, "%o%c%f", tcpopen, tcpclosed, tcpfiltered); 
+	xml->log(XPROBELOG_MSG_PS_TCPST, "%o%c%f", tcpopen, tcpclosed, tcpfiltered);
 	ui->msg("[+]   UDP: %d - open, %d - closed, %d - filtered\n", udpopen, udpclosed, udpfiltered);
 	xml->log(XPROBELOG_MSG_PS_UDPST, "%o%c%f", udpopen, udpclosed, udpfiltered);
 	xml->log(XPROBELOG_STATS_SESS_END, "stats done");
@@ -153,7 +153,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 		if (m_i->second == XPROBE_TARGETP_OPEN)
 			ui->msg("open\t");
 		else if (m_i->second == XPROBE_TARGETP_CLOSED)
-			ui->msg("closed\t"); 
+			ui->msg("closed\t");
 		else if (m_i->second ==XPROBE_TARGETP_FILTERED)
 			ui->msg("filtered");
 		ui->msg("\t");
@@ -177,7 +177,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 		udp_ignore_state = 255; //lame :)
 	}
 
-   	/* UDP */ 
+   	/* UDP */
 	for (m_i = udp_ports.begin(); m_i != udp_ports.end(); m_i++) {
 		if (m_i->second == udp_ignore_state)
 			continue;
@@ -185,7 +185,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 		if (m_i->second == XPROBE_TARGETP_OPEN)
 			ui->msg("open\t");
 		else if (m_i->second == XPROBE_TARGETP_CLOSED)
-			ui->msg("closed\t"); 
+			ui->msg("closed\t");
 		else if (m_i->second ==XPROBE_TARGETP_FILTERED)
 			ui->msg("filtered/open");
 		ui->msg("\t");
@@ -201,7 +201,7 @@ int Portscanner::exec(Target *tg, OS_Matrix *os) {
 		xml->log(XPROBELOG_MSG_PORT, "%n%p%t%s", m_i->first, IPPROTO_UDP, m_i->second, (serv != NULL && serv->s_name != NULL) ? serv->s_name: "N/A");
 	}
 
-	
+
 	//XXX: ugly fix later
 	if (tcp_ignore_state == XPROBE_TARGETP_OPEN ||
 		tcp_ignore_state == XPROBE_TARGETP_CLOSED ||
@@ -268,7 +268,7 @@ int Portscanner::send_packets(Target *tg) {
 		struct in_addr dst;
 		u_short sport;
 		u_short dport;
-	} shainput;	
+	} shainput;
 
 	if (tg->get_delay())
 		send_delay.usec(tg->get_delay());
@@ -289,7 +289,7 @@ int Portscanner::send_packets(Target *tg) {
 	udpp.set_ttl(64);
 	udpp.set_id(rand());
 
-	
+
     for (k=0; k < udpport.size(); k++) {
         while(!udpport[k].get_next(&dport)) {
 		    if (send_delay.microsec()) usleep(send_delay.microsec());
@@ -312,7 +312,7 @@ int Portscanner::send_packets(Target *tg) {
 	 * maybe find a better solution
 	 */
 /*	onestar = tcpportnum / 100;
-	ui->msg("[+] TCP portscan progress:    ");	
+	ui->msg("[+] TCP portscan progress:    ");
 	fflush(stdout);
 */
     for (k=0; k < tcpport.size(); k++) {
@@ -352,16 +352,16 @@ int Portscanner::receive_packets(Target *tg) {
 		/*
     unsigned int tcpportnum = 0, udpportnum = 0, k;
 
-    for (k=0; k < tcpport.size(); k++) 
+    for (k=0; k < tcpport.size(); k++)
                 tcpportnum += tcpport[k].size();
 
-    for (k=0; k < udpport.size(); k++) 
+    for (k=0; k < udpport.size(); k++)
                 udpportnum += udpport[k].size();
- 
+
 				*/
 	int ret, done=0;
     //XXX: Modify timeout here
-    Xprobe::Timeval timeout = (double)(tg->get_rtt() * 2 + (((double)copts->get_send_delay() + 0.01) * 
+    Xprobe::Timeval timeout = (double)(tg->get_rtt() * 2 + (((double)copts->get_send_delay() + 0.01) *
 			    (tcpportnum + udpportnum)));
     Xprobe::Timeval tv;
 	unsigned int seq, optlen;
@@ -430,7 +430,7 @@ int Portscanner::receive_packets(Target *tg) {
                         tcp_ports.insert(pair<int, char>(tcp_packet.get_srcport(), XPROBE_TARGETP_CLOSED));
                         tcpclosed++;
                     }
-					if (copts->analyze_packets()) 
+					if (copts->analyze_packets())
 						analyze_packet(tcp_packet);
                 }
 				tcp_packet.reset_tcpopt();
@@ -443,7 +443,7 @@ int Portscanner::receive_packets(Target *tg) {
                         icmph->code == ICMP_PORT_UNREACH) {
                     // THIS IS LAME SHIT.. fix later!
                     iph = (struct ip *)((char *)icmph +  sizeof(struct usipp::icmphdr));
-                    udph = (struct udphdr *)((char *)iph + sizeof(struct ip));     
+                    udph = (struct udphdr *)((char *)iph + sizeof(struct ip));
 
                     shainput.src.s_addr = sn.get_dst();
                     shainput.dst.s_addr = sn.get_src();
@@ -472,7 +472,7 @@ int Portscanner::receive_packets(Target *tg) {
                 }
 
             }
-                
+
 		}
 //		if (done_sending && start == 0)
 //			start = time(NULL);
@@ -535,7 +535,7 @@ char Portscanner::get_ignore_state(int proto) {
 
 int portscan_mod_init(Xprobe_Module_Hdlr *pt, char *nm) {
 
-    Portscanner *port_scan= new Portscanner;
+    Portscanner *port_scan= new Portscanner();
 
     port_scan->set_name(nm);
     xprobe_mdebug(XPROBE_DEBUG_MODULES, "Initializing the portscanning module\n");
@@ -577,7 +577,7 @@ void Portscanner::analyze_packets(void) {
 	int packet_class, counter=0;
 	bool detected=false;
 	/*
-	 * only two packet classes for now, RST and SYN|ACK 
+	 * only two packet classes for now, RST and SYN|ACK
 	 */
 	packet_class = TH_RST;
 	/*
