@@ -61,6 +61,7 @@ ICMP_Addrmask_Mod::ICMP_Addrmask_Mod(void): Xprobe_Module(XPROBE_MODULE_OSTEST, 
 	kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_addrmask_reply", repchk));
 	kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_addrmask_reply_ttl", ttlchk));
 	kwd_chk.insert(pair<string, Xprobe_Module_Param_ICMP *>("icmp_addrmask_reply_ip_id", ipidchk));
+    add_requires("rtt");
 }
 
 ICMP_Addrmask_Mod::~ICMP_Addrmask_Mod(void) {

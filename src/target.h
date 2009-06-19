@@ -81,7 +81,7 @@ class Signature {
 #define TARGET_ROUTE            0x20
 class Target {
     private:
-        unsigned long int data;
+        vector<string> data;
         struct in_addr addr;
 		long send_delay; // delay in microsecs when sending packs
         map <int, char> tcp_ports;
@@ -116,8 +116,10 @@ class Target {
     /* Scan_Engine interface */
     int scan(void);
     void set_distance(int d) { distance = d; }
+    void add_data(string s) { data.push_back(s); }
+    void add_data(char * s) { add_data(string(s)); }
     int get_distance(void) { return distance; }
-    void set_rtt(Xprobe::Timeval& t) { rtt = t; }
+    void set_rtt(Xprobe::Timeval& t) { rtt = t; add_data("rtt"); }
     Xprobe::Timeval& get_rtt(void) { return rtt; }
     void set_ttl(int, int);
     int get_ttl(int);
@@ -139,6 +141,13 @@ class Target {
 	void signature(const char *, const char *);
 	void signull(void) { fingerprint.signull(); }
 	bool port_is_open(int proto, int port);
+    bool has_data(string &s) {
+        vector<string>::iterator s_i;
+        for (s_i = data.begin(); s_i != data.end(); s_i++) {
+        if ((*s_i).compare(s) == 0) return true;
+        }
+        return false;
+    }
 };
 
 #endif /* TARGET_H */

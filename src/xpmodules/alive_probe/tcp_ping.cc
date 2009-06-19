@@ -40,6 +40,7 @@ extern Cmd_Opts *copts;
 int TCP_Ping_Mod::init(void) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
+    add_provides("rtt");
     return OK;
 }
 

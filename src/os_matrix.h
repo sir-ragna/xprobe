@@ -54,7 +54,7 @@ class OS_Name {
         void list_oses(void);
         int get_osnum(void) { return id_count; }
 };
-               
+
 
 class OS_Vector {
 
@@ -79,7 +79,7 @@ class OS_Matrix {
         vector <OS_Vector> osid_vec;
         int xp_loaded_mods;
         int find_os_id(int);
-    
+
     public:
         OS_Matrix(int);
         virtual ~OS_Matrix(void);
@@ -93,7 +93,9 @@ class OS_Matrix {
         int get_max_score(int);
         /* returns given os_id score in percent */
         int get_prcnt_score(int);
+        /* how many sigs we have */
+        int get_size(void);
 };
 
 #endif /* INTERFACE_H */
-            
+

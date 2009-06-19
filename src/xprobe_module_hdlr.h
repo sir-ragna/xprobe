@@ -43,6 +43,7 @@ class Xprobe_Module_Hdlr {
         int exec(Target *, OS_Matrix *);
         int gather_info(Target *);
         int fini(void);
+Xprobe_Module *find_data_provider(string &d);
 
 	void display_mod_names(void);
         int register_module(Xprobe_Module *);

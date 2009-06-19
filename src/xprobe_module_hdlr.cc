@@ -29,11 +29,13 @@
 extern Interface *ui;
 extern Cmd_Opts *copts;
 extern XML_Log *xml;
+extern OS_Name *oses;
 
 /* we need a function to sort xprobe_module objects by pointer. */
 
 bool compare_module(Xprobe_Module *lhs, Xprobe_Module* rhs) {
-		return lhs->get_gain() < rhs->get_gain();
+    /* we need to sort in descending order */
+		return lhs->get_score() > rhs->get_score();
 }
 
 int Xprobe_Module_Hdlr::load(void) {
@@ -99,44 +101,113 @@ int Xprobe_Module_Hdlr::gather_info(Target *tg) {
     delete os;
     return 1;
 }
+    /* */
+    /*
+    Our adaptive execution mechanism is very simple.
+
+     0. we sort modules by their score
+
+     1. We look through executable modules vector, we skip disabled modules.
+     we search for module that is ready to execute
+     or a module that requires some data which can be provided by other module.
+
+     2. we execute this module, or data provider module.
+
+
+     3. we set 'top matching os' for all the modules, so information gain(os) can be
+     calculated properly.
+
+     4. we may disable modules, that return information gain = 0
+
+     5. if we don't execute any module during this iteration, we terminate
+
+     6. we repeat
+
+      */
+
 
 int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
     vector <Xprobe_Module *>::iterator m_i;
-    sort(modlist.begin(), modlist.end(), compare_module);
+    bool done;
+    int iter;
 
+    /* we set parameters for each module. so they can calculate their own scores */
     for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
-        cout << "module " << (*m_i)->get_name() << " " << (*m_i)->get_gain() << "\n";
+        (*m_i)->set_totals(modlist.size(), keywords, oses->get_osnum());
+        //cout << "module " << (*m_i)->get_name() << " t/r " << (*m_i)->get_total();
+        //cout << "/" << (*m_i)->get_range() << "\n";
     }
-    /*
-     We have two lists. pending modules (waiting for data) and
-     executable modules
+    iter = 0;
+    do {
+        /* we sort modules */
+        sort(modlist.begin(), modlist.end(), compare_module);
+        done = false;
+        m_i = modlist.begin();
 
-     1. We build executable module vector, from 'available' module
-     vector by iterating through all available modules and checking if the module
-     is ready to execute.
+        while (!done) {
+            if (modlist.end() == m_i) {
+                done = true;
+                continue;
+            }
+            Xprobe_Module  * toexec = (*m_i);
 
-     2. if module is ready to execute, we move module to executable vector
-      (if module is not ready to execute, we need to check if
-      we have any other module that can provide that data. and if we find
-      this module, we execute it).
+            if (!(*m_i)->is_disabled()) {
 
-     3. we sort executable vector
+                while (toexec != NULL && !(toexec)->enough_data(tg)) {
+                    cout << toexec->get_name() << "has not enough data\n";
+                    toexec = find_data_provider((*m_i)->missing_data(tg));
+                }
+                if (toexec == NULL) {
+                    (*m_i)->disable();
+                    continue; // try next module in list
+                }
+                cout << "Executing " << toexec->get_name() <<
+                    " score " << toexec->get_score();
+                cout << "\n";
+                toexec->exec(tg, os);
+                toexec->disable();
+                done = true;
+                continue;
+            }
+            m_i++; // if first module was disabled, we just iterate
 
-     4. we remove modules, that return information gain = 0
+        }
+        iter++;
+        cout << "iteration: " << iter << "\n";
 
-     5. if size of executable array is 0 - we terminate
+        if (m_i == modlist.end()) done = true;
+        else done = false;
 
-     6. we execute module that is on the top of executable vector
+        /* tell all the modules that so far we are aiming at 'top_os'
+         * so scores are ajusted */
 
-     7. we remove executed module from executable vector
+        for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
+            (*m_i)->set_topos(os->get_top(0));
+        }
+        /* for optimizaton, we may disable all the modules, whose information
+         * gain would be there
+         * but be careful not to disable any data collection modules, otherwise
+         * it may impact execution of fingerprinting modules */
 
-     8. we repeat
-
-      */
+    } while (!done);
 
     return 1;
 }
 
+Xprobe_Module *Xprobe_Module_Hdlr::find_data_provider(string &d) {
+    vector <Xprobe_Module *>::iterator m_i;
+    Xprobe_Module *provider = NULL;
+
+    for (m_i=modlist.begin(); m_i!=modlist.end(); m_i++) {
+        if (!(*m_i)->is_disabled()) {
+            if ((*m_i)->provides_data(d)) {
+            return (*m_i);
+            }
+        }
+    }
+
+    return provider;
+}
 int Xprobe_Module_Hdlr::fini(void) {
     vector <Xprobe_Module *>::iterator m_i;
 
@@ -193,8 +264,8 @@ bool Xprobe_Module_Hdlr::parse_keyword(int osid, string &kwd, string &val) {
             xprobe_debug(XPROBE_DEBUG_CONFIG,
                          "[x] keyword: %s handled by module: %s\n", kwd.c_str(),
                          (*m_i)->get_name());
-            int range = (*m_i)->parse_keyword(osid, kwd.c_str(), val.c_str());
-            (*m_i)->inc_gain(osid, kwd + ":" + val);
+            (*m_i)->parse_keyword(osid, kwd.c_str(), val.c_str());
+            (*m_i)->inc_gain(osid, kwd ,val);
             return true;
         }
     }
