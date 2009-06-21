@@ -38,13 +38,19 @@ using namespace std;
 class OsIdPair {
 private:
     vector <int> osid;
+    int range;
     string val;
 public:
     OsIdPair(void) {
     }
-    OsIdPair(int i, string & s) {
+    OsIdPair(int i, string & s, int r) {
         this->osid.push_back(i);
         this->val = this->low(s);
+        if (r < 1) {
+            cout << "Error! value " << s << " given range is " << r << "default to 1\n";
+            r = 1;
+        }
+        this->range = r;
     }
     static string &low(string & s) {
         std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -74,6 +80,9 @@ public:
     int total(void) {
         return osid.size();
     }
+    int get_range() {
+        return range;
+    }
 };
 
 class KeywGain {
@@ -87,8 +96,8 @@ public:
     bool iskey( string &k) {
         return (key.compare(k) == 0);
     }
-    void add_gain(int osid, string & s) {
-         OsIdPair p = OsIdPair(osid, s);
+    void add_gain(int osid, string & s, int r) {
+         OsIdPair p = OsIdPair(osid, s, r);
         vector<OsIdPair>::iterator o_i;
         for (o_i = values.begin(); o_i != values.end(); o_i++) {
             if ((*o_i) == p) {
@@ -107,13 +116,20 @@ public:
         }
         return tl;
     }
-    int range() {
+    int range(int osid) {
         /* how different the values can be. in numbers */
         /* Currently we assume that all possible values are represented in signature
          * file. However,
          * we may need to introduce special semantics in keyword name to correct this
          * logic. */
-        return values.size();
+        vector<OsIdPair>::iterator o_i;
+        for (o_i = values.begin(); o_i != values.end(); o_i++) {
+            if((*o_i).hasid(osid)) {
+                return (*o_i).get_range();
+            }
+        }
+
+        return 0; // means this keyword has no value for asked signature
     }
     int similarTo(int osid) {
         /* how many other osids have the same value */
@@ -146,16 +162,16 @@ class Xprobe_Module {
         int total_modules;
         int total_sigs;
    public:
-    void inc_gain(int osid, string key, string val) {
+    void inc_gain(int osid, string key, string val, int range) {
         vector <KeywGain>::iterator k_i;
         for (k_i = gain.begin(); k_i != gain.end(); k_i++) {
             if ((*k_i).iskey(key)) {
-                (*k_i).add_gain(osid, val);
+                (*k_i).add_gain(osid, val, range);
                 return;
             }
         }
         KeywGain kw = KeywGain(key);
-        kw.add_gain(osid, val);
+        kw.add_gain(osid, val, range);
         gain.push_back(kw);
     }
     void set_desc(const char *nm) { description = nm; }
@@ -245,15 +261,6 @@ class Xprobe_Module {
                 total = (*k_i).total();
         }
         return total;
-    }
-    virtual int get_range(void) {
-        vector<KeywGain>::iterator k_i;
-        int range = 1; /* range of values for a module is multiplication of ranges
-        of all keywords */
-        for (k_i = gain.begin(); k_i != gain.end(); k_i++) {
-        range = range *(*k_i).range();
-        }
-        return range;
     }
     bool provides_data(string &s) {
         vector<string>::iterator s_i;

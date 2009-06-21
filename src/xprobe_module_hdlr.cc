@@ -265,8 +265,8 @@ bool Xprobe_Module_Hdlr::parse_keyword(int osid, string &kwd, string &val) {
             xprobe_debug(XPROBE_DEBUG_CONFIG,
                          "[x] keyword: %s handled by module: %s\n", kwd.c_str(),
                          (*m_i)->get_name());
-            (*m_i)->parse_keyword(osid, kwd.c_str(), val.c_str());
-            (*m_i)->inc_gain(osid, kwd ,val);
+            int range = (*m_i)->parse_keyword(osid, kwd.c_str(), val.c_str());
+            (*m_i)->inc_gain(osid, kwd ,val, range);
             return true;
         }
     }

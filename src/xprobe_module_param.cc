@@ -132,6 +132,7 @@ int Xprobe_Module_Param::add_param(int param, int orig, OS_Matrix *os) {
 /* Lamye-arse parser.. will do it better later ;-) XXX */
 int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
     xprobe_module_param_t p;
+    int range = 1; // by default our range is 1
 
     switch(type) {
         case XPROBE_MODULE_PARAM_BOOL:
@@ -193,6 +194,7 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
                 p.low = atoi(param) - 1; p.high = atoi(param) + 1;
             }
 			sig_insert(os_id, p);
+            range = abs(p.high - p.low);
             break;
 		case XPROBE_MODULE_PARAM_INTLIST:
 			if (xp_lib::tokenize(param, ',', &p.val_list) == FAIL) {
@@ -200,6 +202,7 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
 				return FAIL;
 			}
 			sig_insert(os_id, p);
+            range = p.val_list.size();
 			break;
 		case XPROBE_MODULE_PARAM_STRATEGY:
 			switch(param[0]) {
@@ -222,7 +225,7 @@ int Xprobe_Module_Param::parse_param(int os_id, const char *param) {
             ui->msg("Xprobe_Module_Param::parse_param(): oops.. something fucked up!\n");
             return FAIL;
     }
-    return type;
+    return range;
 }
 
 int Xprobe_Module_Param::gen_match(int cnt, OS_Matrix *os) {
