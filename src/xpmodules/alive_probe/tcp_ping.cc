@@ -61,6 +61,9 @@ int TCP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
 
     tv = copts->get_timeout();
 
+    /* TODO: this module is to execute pings on demand. therefore
+     *  we need to ask for the ports, which another module wanted
+     */
     if (tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_OPEN) == -1 &&
         tg->get_port(IPPROTO_TCP, XPROBE_TARGETP_CLOSED) == -1) {
         ui->msg("[-] %s module: no closed/open TCP ports known on %s. Module test failed\n", get_name(),
@@ -111,9 +114,9 @@ int TCP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
         xprobe_debug(XPROBE_DEBUG_MODULES, "TCP PING response: %.7f\n", (double)tt);
         if (tg->get_rtt() < tt)
             tg->set_rtt(tt);
-        os->add_result(get_id(), 1, XPROBE_MATCH_YES);
+      //  os->add_result(get_id(), 1, XPROBE_MATCH_YES);
     } else {
-        os->add_result(get_id(), 1, XPROBE_MATCH_NO);
+     //   os->add_result(get_id(), 1, XPROBE_MATCH_NO);
     }
 
     return OK;

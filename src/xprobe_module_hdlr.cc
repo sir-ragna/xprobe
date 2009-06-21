@@ -161,9 +161,9 @@ int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
                     (*m_i)->disable();
                     continue; // try next module in list
                 }
-                cout << "Executing " << toexec->get_name() <<
-                    " score " << toexec->get_score();
-                cout << "\n";
+               // cout << "Executing " << toexec->get_name() <<
+                //    " score " << toexec->get_score();
+                //cout << "\n";
                 toexec->exec(tg, os);
                 toexec->disable();
                 done = true;
@@ -173,7 +173,8 @@ int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
 
         }
         iter++;
-        cout << "iteration: " << iter << "\n";
+        //cout << "iteration: " << iter << "\n";
+        //cout << "suspected: " << oses->osid2char(os->get_top(0)) << "\n";
 
         if (m_i == modlist.end()) done = true;
         else done = false;

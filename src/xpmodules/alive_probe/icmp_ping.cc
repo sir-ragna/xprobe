@@ -64,9 +64,9 @@ int ICMP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
     xprobe_debug(XPROBE_DEBUG_MODULES, "--%s module has been executed against: %s\n", get_name(),
             inet_ntoa(tg->get_addr()));
     if (do_icmp_ping(tg)) {
-        os->add_result(get_id(), 1, XPROBE_MATCH_YES);
+        //os->add_result(get_id(), 1, XPROBE_MATCH_YES);
     } else {
-        os->add_result(get_id(), 1, XPROBE_MATCH_NO);
+        //os->add_result(get_id(), 1, XPROBE_MATCH_NO);
     }
     return OK;
 }

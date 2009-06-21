@@ -118,9 +118,9 @@ int UDP_Ping_Mod::exec(Target *tg, OS_Matrix *os) {
         xprobe_debug(XPROBE_DEBUG_MODULES, "UDP PING response: %.7f\n", (double)tt);
         if (tg->get_rtt() < tt)
             tg->set_rtt(tt);
-        os->add_result(get_id(), 1, XPROBE_MATCH_YES);
+     //   os->add_result(get_id(), 1, XPROBE_MATCH_YES);
     } else {
-        os->add_result(get_id(), 1, XPROBE_MATCH_NO);
+    //    os->add_result(get_id(), 1, XPROBE_MATCH_NO);
     }
 
     return OK;
