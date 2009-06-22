@@ -7,9 +7,10 @@
 extern Interface *ui;
 
 int icmp_port_unreach::parse_keyword(int os_id, const char *keyword, const char *value){
-	
+
 	Fingerprint newfingerprint;
 	int iii=0;
+    int range = 1;
 
     xprobe_debug(XPROBE_DEBUG_SIGNATURES, "[%s] Parsing for %i : %s  = %s\n",
                                                        get_name(), os_id,  keyword, value);
@@ -47,7 +48,7 @@ int icmp_port_unreach::parse_keyword(int os_id, const char *keyword, const char 
 				case ICMP_UNREACH_PRECEDENCE:
 					iter->second.put_icmp_prec_bits(value);
 					break;
-				case ICMP_UNREACH_DF: 
+				case ICMP_UNREACH_DF:
 					iter->second.put_icmp_df(value);
 					break;
 				case ICMP_UNREACH_IPID:
@@ -57,8 +58,8 @@ int icmp_port_unreach::parse_keyword(int os_id, const char *keyword, const char 
 					iter->second.put_reply(value);
 					break;
 			}
-			return OK;
+			return range;
 		}
 	}
-return OK;
+return range;
 }

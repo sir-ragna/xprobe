@@ -154,7 +154,7 @@ int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
             if (!(*m_i)->is_disabled()) {
 
                 while (toexec != NULL && !(toexec)->enough_data(tg)) {
-                    cout << toexec->get_name() << "has not enough data\n";
+                    cout << toexec->get_name() << " has not enough data\n";
                     toexec = find_data_provider((*m_i)->missing_data(tg));
                 }
                 if (toexec == NULL) {

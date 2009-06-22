@@ -41,6 +41,9 @@ int UDP_Ping_Mod::init(void) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
     add_provides("rtt");
+    add_provides("udp:port:open");
+    add_provides("udp:port:closed");
+    add_requires("udp:port");
     return OK;
 }
 

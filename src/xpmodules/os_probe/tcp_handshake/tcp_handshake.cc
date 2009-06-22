@@ -359,6 +359,7 @@ int TCP_Handshake_Mod::fini(void) {
 int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val)  {
 	unsigned int vl=0;
 	map<string, Xprobe_Module_Param_TCP *>::iterator m_i;
+    int range = 1;
 
 	xprobe_debug(XPROBE_DEBUG_SIGNATURES, "Parsing for %i : %s  = %s\n", os_id,  kwd, val);
 
@@ -373,6 +374,8 @@ int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val
 		string options(val), fin_opt;
 		string::size_type begin, end;
 		unsigned int k=0;
+
+        range = 10; //TODO: this is obviously wrong. review
 
 		memset(opt_order, 0, sizeof(opt_order));
 		//for the loop to work and parse last param
@@ -433,7 +436,7 @@ int TCP_Handshake_Mod::parse_keyword(int os_id, const char *kwd, const char *val
 		tsecr.insert(pair<int, unsigned int>(os_id, vl));
 	} else
 		ui->msg("[%s] Unknown keyword %s\n", get_name());
-    return OK;
+    return range;
 };
 
 int TCP_Handshake_Mod::get_tcpopts_pack(Target *tg, TCP *tcp) {
