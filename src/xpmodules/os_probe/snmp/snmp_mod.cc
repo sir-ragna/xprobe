@@ -62,6 +62,8 @@ int SNMP_Mod::parse_keyword(int os_id, const char *kwd, const char *val) {
 
 int SNMP_Mod::init(void) {
 	xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
+    add_provides("udp:port:open"); // need a mechanism to tell we need port 161
+    add_provides("udp:port:closed"); // need a mechanism to tell we need port 161
 	return OK;
 }
 
@@ -93,10 +95,10 @@ int SNMP_Mod::exec(Target *tg, OS_Matrix *os) {
 	SNMP snmp;
 
 
-	if (!tg->port_is_open(IPPROTO_UDP, 161)) {
+	/* if (!tg->port_is_open(IPPROTO_UDP, 161)) {
 		ui->error("[-] %s: need UDP port 161 open\n", get_name());
 		return FAIL;
-	}
+	} */
 	bzero(&to, sizeof(to));
 	to.sin_family = AF_INET;
 	to.sin_port = htons(161);
@@ -139,6 +141,8 @@ int SNMP_Mod::exec(Target *tg, OS_Matrix *os) {
 		if ((retval = send(sock, packet, packlen, 0)) < 0) {
 			if (errno == ECONNREFUSED)
 				tg->add_port(IPPROTO_UDP, 161, XPROBE_TARGETP_CLOSED);
+                tg->add_data("udp:port");
+                tg->add_data("udp:port:closed");
 			ui->error("[-] %s: send() failed (%s)\n", get_name(), strerror(errno));
 			return FAIL;
 		}
@@ -148,7 +152,11 @@ int SNMP_Mod::exec(Target *tg, OS_Matrix *os) {
 			// timeout
 			continue;
 		} else if (retval == FAIL) {
-			ui->error("[-] %s: RecvTimeout() failed!\n", get_name());
+            // TODO: if -1, there was error in receiving the packet
+            //  most likely connection refused.
+            tg->add_data("udp:port");
+		    tg->add_port(IPPROTO_UDP, 161, XPROBE_TARGETP_CLOSED);
+			//ui->error("[-] %s: RecvTimeout() failed!\n", get_name());
 			return FAIL;
 		}
 		xprobe_debug(XPROBE_DEBUG_MODULES, "%s got %d bytes\n", get_name(), retval);

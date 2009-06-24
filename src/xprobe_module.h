@@ -273,6 +273,12 @@ class Xprobe_Module {
         return false;
     }
     bool enough_data(Target *tg) {
+        // We need to have some kind of
+        // regular expressions here
+        // so we could have: OR matches
+        // and generic matches (i.e. udp:port:* should match udp:port:161 for example
+        // also module that "provides", needs
+        // to know what data was required)
         vector<string>::iterator s_i;
         if (required.size() == 0)
             return true;

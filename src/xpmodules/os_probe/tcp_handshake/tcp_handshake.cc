@@ -68,6 +68,7 @@ TCP_Handshake_Mod::~TCP_Handshake_Mod(void) {
 int TCP_Handshake_Mod::init(void) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
+    add_requires("tcp:port");
     return OK;
 }
 

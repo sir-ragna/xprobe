@@ -13,6 +13,8 @@ extern Cmd_Opts *copts;
 int TTL_Mod::init (void) {
 
 	xprobe_mdebug(XPROBE_DEBUG_MODULES, "[TTL_Mod]: Initialized\n");
+    add_requires("udp:port");
+    add_provides("route");
 return OK;
 
 }

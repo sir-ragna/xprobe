@@ -88,6 +88,9 @@ int SMB_Mod::parse_keyword(int os_id, const char *kwd, const char *val) {
 
 int SMB_Mod::init(void) {
 	xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
+    add_requires("tcp:port:open"); // 139, 445
+    // These modules actually may execute and return status of these
+    // ports as well. so they can also be data providers
 	return OK;
 }
 
