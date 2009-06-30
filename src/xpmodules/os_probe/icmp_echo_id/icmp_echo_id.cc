@@ -86,6 +86,7 @@ ICMP_Echo_Id_Mod::~ICMP_Echo_Id_Mod(void) {
 int ICMP_Echo_Id_Mod::init(void) {
 
     xprobe_debug(XPROBE_DEBUG_MODULES, "%s module initialized\n", get_name());
+    add_requires("rtt");
     return OK;
 }
 

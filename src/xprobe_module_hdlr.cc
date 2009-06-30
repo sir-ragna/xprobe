@@ -161,11 +161,12 @@ int Xprobe_Module_Hdlr::exec(Target *tg, OS_Matrix *os) {
                     (*m_i)->disable();
                     continue; // try next module in list
                 }
-               // cout << "Executing " << toexec->get_name() <<
-                //    " score " << toexec->get_score();
-                //cout << "\n";
+                cout << "Executing " << toexec->get_name() <<
+                    " score " << toexec->get_score();
+                cout << "\n";
                 toexec->exec(tg, os);
                 toexec->disable();
+                //cout << "completed\n";
                 done = true;
                 continue;
             }
