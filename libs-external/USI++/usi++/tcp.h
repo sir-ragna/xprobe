@@ -15,6 +15,7 @@
 #include "usi-structs.h"
 #include "datalink.h"
 #include "ip.h"
+#include <string.h>
 
 namespace usipp {
 
